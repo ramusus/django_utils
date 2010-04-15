@@ -126,11 +126,7 @@ def smart_time(date):
     """
     Cover for ru_strftime from pytils. Don't show needless part of time string
     """
-    if date.tzinfo:
-        now = datetime.datetime.now(date.tzinfo)
-    else:
-        now = datetime.datetime.now()
-
+    now = datetime.datetime.now(date.tzinfo)
     today = now.replace(hour=0, minute=0, second=0)
     if date > now - datetime.timedelta(hours=2):
         ''' from 2 hours ago to now '''

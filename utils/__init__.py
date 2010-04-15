@@ -6,6 +6,9 @@ from django.utils import simplejson
 
 from decorators import render_to, ajax_required
 
+def dict_with_keys(dictionary, keys=[], **kwargs):
+    return dict([(k,v) for k,v in dictionary.items() if k in keys], **kwargs)
+
 class JsonResponse(HttpResponse):
     def __init__(self, object):
         if isinstance(object, QuerySet):
