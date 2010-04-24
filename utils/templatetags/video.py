@@ -19,7 +19,7 @@ def youtube_tag(video_id, width, height):
 @register.filter
 @stringfilter
 def youtube(url, sizes='465x278'):
-    [(width, height)] = re.findall(r'^(.+)x(.+)$', sizes)
+    (width, height) = sizes.split('x')
     url = str(url)
     regex = re.compile(youtube_url_pattern)
     match = regex.match(url)
@@ -29,3 +29,42 @@ def youtube(url, sizes='465x278'):
     video_tag = youtube_tag(video_id, width, height)
     return mark_safe(video_tag)
 youtube.is_safe = True # Don't escape HTML
+
+# from here http://www.djangosnippets.org/snippets/212/
+
+@register.filter
+@stringfilter
+def youtubize(value, sizes='425x250'):
+    """
+    Converts http:// links to youtube into youtube-embed statements, so that
+    one can provide a simple link to a youtube video and this filter will
+    embed it.
+
+    Based on the Django urlize filter.
+    """
+    (width, height) = sizes.split('x')
+    text = value
+    # Configuration for urlize() function
+    LEADING_PUNCTUATION  = ['(', '<', '&lt;']
+    TRAILING_PUNCTUATION = ['.', ',', ')', '>', '\n', '&gt;']
+    word_split_re = re.compile(r'(\s+)')
+    punctuation_re = re.compile('^(?P<lead>(?:%s)*)(?P<middle>.*?)(?P<trail>(?:%s)*)$' % \
+            ('|'.join([re.escape(x) for x in LEADING_PUNCTUATION]),
+            '|'.join([re.escape(x) for x in TRAILING_PUNCTUATION])))
+    youtube_re = re.compile ('http://www.youtube.com/watch.v=(?P<videoid>(.+))')
+
+    words = word_split_re.split(text)
+    for i, word in enumerate(words):
+        match = punctuation_re.match(word)
+        if match:
+            lead, middle, trail = match.groups()
+            if middle.startswith('http://www.youtube.com/watch') or middle.startswith('http://youtube.com/watch'):
+                video_match = youtube_re.match(middle)
+                if video_match:
+                    video_id = video_match.groups()[1]
+                    middle = youtube_tag(video_id, width, height)
+
+            if lead + middle + trail != word:
+                words[i] = lead + middle + trail
+    return mark_safe(''.join(words))
+youtubize.is_safe = True # Don't escape HTML
