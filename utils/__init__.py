@@ -53,6 +53,13 @@ def log(message, file=False):
     logger.info(message)
     logger.removeHandler(handler)
 
+def pdb():
+    import pdb, sys
+    sys.__stdout__.write('\a')
+    sys.__stdout__.flush()
+    debugger = pdb.Pdb(stdin=sys.__stdin__, stdout=sys.__stdout__)
+    debugger.set_trace(sys._getframe().f_back)
+
 def load_templatetags():
     from django.conf import settings
     from django.template import add_to_builtins

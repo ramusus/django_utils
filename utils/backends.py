@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.backends import ModelBackend
+from django.contrib.auth.models import User
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import get_model
 
@@ -20,10 +21,13 @@ class CustomUserModelBackend(ModelBackend):
 
     @property
     def user_class(self):
-        if not hasattr(self, '_user_class') and hasattr(settings, 'CUSTOM_USER_MODEL'):
-            self._user_class = get_model(*settings.CUSTOM_USER_MODEL.split('.', 2))
-            if not self._user_class:
-                raise ImproperlyConfigured('Could not get custom user model')
+        if not hasattr(self, '_user_class'):
+            if hasattr(settings, 'CUSTOM_USER_MODEL'):
+                self._user_class = get_model(*settings.CUSTOM_USER_MODEL.split('.', 2))
+                if not self._user_class:
+                    raise ImproperlyConfigured('Could not get custom user model')
+            else:
+                self._user_class = User
         return self._user_class
 
 from django.contrib.auth.backends import ModelBackend
