@@ -11,13 +11,18 @@ class PackedJSNode(template.Node):
         self.ready = ready
 
     def get_tags_around(self, code):
+        ready_code = '''
+            $(function() {
+                %s
+            })
+            ''' % code
         return '''
-<script type="text/javascript">
-/*<![CDATA[*/
-%s
-/*]]>*/
-</script>
-''' % (self.ready and '$(function() { %s })' % code or code)
+            <script type="text/javascript">
+            /*<![CDATA[*/
+            %s
+            /*]]>*/
+            </script>
+            ''' % (self.ready and ready_code or code)
 
     def render(self, context):
         p = JavaScriptPacker()

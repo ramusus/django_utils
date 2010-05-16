@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.http import HttpResponseBadRequest
+from django.utils.functional import wraps
 
 def ajax_required(f):
     """
@@ -19,6 +20,22 @@ def ajax_required(f):
     wrap.__name__=f.__name__
     return wrap
 
+def json_success_error(func):
+    '''
+    Decorator for returning json string with success or error if exception in view raised
+    '''
+    def wrapper(*args, **kwargs):
+        from utils import JsonResponse
+        try:
+            return JsonResponse({'success': func(*args, **kwargs)})
+        except Exception, e:
+            try:
+                e = str(e)
+            except:
+                e = unicode(e)
+            return JsonResponse({'error': e})
+
+    return wraps(func)(wrapper)
 
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
