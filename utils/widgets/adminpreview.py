@@ -69,7 +69,10 @@ class AdminImagePreviewWidget(Widget):
             file_path = '%s%s' % (settings.MEDIA_URL, file_name)
             try:            # is image
                 Image.open(os.path.join(settings.MEDIA_ROOT, file_name))
-                output.append('<a target="_blank" href="%s">%s</a>' % (file_path, thumbnail(file_name, self.width, self.height)))
+                output.append('''
+                    <input type="hidden" name="%s" value="%s" />
+                    <a target="_blank" href="%s">%s</a>
+                    ''' % (name, value, file_path, thumbnail(file_name, self.width, self.height)))
             except IOError: # not image
                 output.append('<input type="text" name="%s" />' % name)
         else:
