@@ -194,3 +194,39 @@ def percentage(fraction, population):
         return "%.0f%%" % ((float(fraction) / float(population)) * 100) if population else 0
     except ValueError:
         return ''
+
+from django.contrib.humanize.templatetags.humanize import intcomma
+@register.filter()
+def intspace(value):
+    """
+    Converts an integer to a string containing spaces every three digits.
+    For example, 3000 becomes '3 000' and 45000 becomes '45 000'.
+    Requires django.contrib.humanize
+    """
+    return intcomma(value).replace(',',' ')
+
+from django.contrib.markup.templatetags.markup import textile
+from django.utils.safestring import mark_safe
+
+@register.filter
+@stringfilter
+def textile_fix_dashes(value):
+    '''
+    >>> from utils.templatetags.utils import textile_fix_dashes
+    >>> textile_fix_dashes('2000-2009 2000--2009 first - second first -- second first-second :-)')
+    u'<p>2000&ndash;2009 2000&ndash;2009 first &mdash; second first &mdash; second first-second :-)</p>'
+    '''
+    for match, before, dash, after in re.findall(r'((.)(\-{1,2})(.))', value):
+        if before == after == ' ':
+            symbol = '&mdash;'
+        else:
+            try:
+                assert isinstance(int(before), int)
+                assert isinstance(int(after), int)
+                symbol = '&ndash;'
+            except:
+                symbol = 'shortdash;'
+
+        value = value.replace(match, '%s%s%s' % (before, symbol, after))
+    value = textile(value).replace('shortdash;','-')
+    return mark_safe(value)
