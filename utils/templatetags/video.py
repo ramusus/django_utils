@@ -10,9 +10,9 @@ youtube_url_pattern = r'^(?:http://)?(?:www\.)?(?:youtube\.com/(?:watch\?v=|v/))
 def youtube_tag(video_id, width, height):
     return '''
     <object width="%s" height="%s">
-        <param name="movie" value="http://www.youtube.com/v/%s"></param>
+        <param name="movie" value="http://www.youtube.com/v/%s?fs=1"></param>
         <param name="allowFullScreen" value="true"></param>
-        <embed src="http://www.youtube.com/v/%s" type="application/x-shockwave-flash" allowfullscreen="true" wmode="opaque" width="%s" height="%s"></embed>
+        <embed src="http://www.youtube.com/v/%s?fs=1" type="application/x-shockwave-flash" allowfullscreen="true" wmode="opaque" width="%s" height="%s"></embed>
     </object>
     ''' % (width, height, video_id, video_id, width, height)
 
