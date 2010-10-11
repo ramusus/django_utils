@@ -28,9 +28,10 @@ class JsonResponse(HttpResponse):
             content = serialize('json', object)
         else:
             # convert all Django Translating Proxy instances to unicode strings
-            for key, val in object.items():
-                if isinstance(val, Promise):
-                    object[key] = unicode(val)
+            if isinstance(object, dict):
+                for key, val in object.items():
+                    if isinstance(val, Promise):
+                        object[key] = unicode(val)
             content = simplejson.dumps(
                 object, indent=2, cls=json.DjangoJSONEncoder,
                 ensure_ascii=False)
