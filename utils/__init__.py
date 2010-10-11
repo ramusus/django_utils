@@ -9,11 +9,28 @@ from decorators import render_to, ajax_required, json_success_error
 def dict_with_keys(dictionary, keys=[], **kwargs):
     return dict([(k,v) for k,v in dictionary.items() if k in keys], **kwargs)
 
+from pytils.numeral import get_plural as pytils_get_plural
+from django.utils.functional import Promise
+def get_plural(amount, variants, absence=None):
+    '''
+    Wrapper for pytils.numeral.get_plural for accepting Django Translating Proxy instances in arguments
+    '''
+    if isinstance(variants, Promise):
+        variants = unicode(variants)
+    if absence and isinstance(absence, Promise):
+        absence = unicode(absence)
+    return pytils_get_plural(amount, variants, absence)
+
+from django.utils.functional import Promise
 class JsonResponse(HttpResponse):
     def __init__(self, object):
         if isinstance(object, QuerySet):
             content = serialize('json', object)
         else:
+            # convert all Django Translating Proxy instances to unicode strings
+            for key, val in object.items():
+                if isinstance(val, Promise):
+                    object[key] = unicode(val)
             content = simplejson.dumps(
                 object, indent=2, cls=json.DjangoJSONEncoder,
                 ensure_ascii=False)
