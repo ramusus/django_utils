@@ -21,3 +21,4 @@ class LocaleBySubdomainMiddleware(LocaleMiddleware):
 
         translation.activate(language)
         request.LANGUAGE_CODE = translation.get_language()
+        settings.LANGUAGE_CODE = request.LANGUAGE_CODE
