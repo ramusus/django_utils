@@ -6,20 +6,41 @@ from django.utils import simplejson
 
 from decorators import render_to, ajax_required, json_success_error
 
+def is_language(code):
+    # important to import inside method, otherwise LANGUAGE_CODE willn't be actual
+    from django.conf import settings
+    return getattr(settings, 'LANGUAGE_CODE', '').find(code) > -1
+
 def dict_with_keys(dictionary, keys=[], **kwargs):
     return dict([(k,v) for k,v in dictionary.items() if k in keys], **kwargs)
 
-from pytils.numeral import get_plural as pytils_get_plural
+from pytils.numeral import get_plural as pytils_get_plural, choose_plural as pytils_choose_plural
 from django.utils.functional import Promise
 def get_plural(amount, variants, absence=None):
     '''
     Wrapper for pytils.numeral.get_plural for accepting Django Translating Proxy instances in arguments
+    Use simple algorithm if LANGUAGE_CODE is not 'ru'
+    '''
+    if amount or absence is None:
+        return u"%d %s" % (amount, choose_plural(amount, variants))
+    else:
+        if isinstance(absence, Promise):
+            absence = unicode(absence)
+        return absence
+
+def choose_plural(amount, variants):
+    '''
+    Wrapper for pytils.numeral.choose_plural for accepting Django Translating Proxy instances in arguments
+    Use simple algorithm if LANGUAGE_CODE is not 'ru'
     '''
     if isinstance(variants, Promise):
         variants = unicode(variants)
-    if absence and isinstance(absence, Promise):
-        absence = unicode(absence)
-    return pytils_get_plural(amount, variants, absence)
+    if is_language('ru'):
+        return pytils_choose_plural(amount, variants)
+    else:
+        if not isinstance(variants, (list,tuple)):
+            variants = variants.split(',')
+        return variants[0] if amount == 1 else variants[1]
 
 from django.utils.functional import Promise
 class JsonResponse(HttpResponse):

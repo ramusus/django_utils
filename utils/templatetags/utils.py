@@ -120,7 +120,10 @@ foo < bar
     return entity_re.subn(substitute_entity, string)[0]
 
 from pytils.templatetags.pytils_dt import ru_strftime, distance_of_time
+from django.utils.datetime_safe import strftime
+from django.utils.translation import ugettext as _
 import datetime
+from .. import is_language
 @register.filter
 def smart_time(date):
     """
@@ -128,24 +131,28 @@ def smart_time(date):
     """
     now = datetime.datetime.now(date.tzinfo)
     today = now.replace(hour=0, minute=0, second=0)
-    if date > now - datetime.timedelta(hours=2):
-        ''' from 2 hours ago to now '''
+    if date > now - datetime.timedelta(hours=2) and is_language('ru'):
+        # from 2 hours ago to now
         return distance_of_time(date)
     elif date > today:
-        ''' from start of today to 2 hours ago '''
-        format = '%H:%M'
+        # from start of today to 2 hours ago
+        format = u'%H:%M'
     elif date > today - datetime.timedelta(days=1):
-        ''' yesterday '''
-        format = u'вчера, %H:%M'
+        # yesterday
+        format = _('yesterday') + u', %H:%M'
     elif date > today - datetime.timedelta(days=2):
-        ''' the day before yesterday '''
-        format = u'позавчера, %H:%M'
+        # the day before yesterday
+        format = _('day before yesterday') + u', %H:%M'
     elif date > today.replace(day=1, month=1):
-        ''' this year '''
-        format = '%d %B, %H:%M'
+        # this year
+        format = u'%d %B, %H:%M'
     else:
-        format = '%d %B %Y, %H:%M'
-    return ru_strftime(date, format)
+        format = u'%d %B %Y, %H:%M'
+
+    if is_language('ru'):
+        return ru_strftime(date, format)
+    else:
+        return strftime(date, format)
 
 from django import template, conf
 from pytils import dt
