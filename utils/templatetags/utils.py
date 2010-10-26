@@ -8,6 +8,16 @@ register = template.Library()
 @register.simple_tag
 def url_obj(object):
     '''
+    В отличие от тега {% url %}, работает не с view, а  возвращает относительный путь к передаваемому объекту
+    '''
+    try:
+        return getattr(object, 'url', object.get_absolute_url())
+    except:
+        return '#'
+
+@register.simple_tag
+def abs_url_obj(object):
+    '''
     В отличие от тега {% url %}, работает не с view, а  возвращает абсолютный путь к передаваемому объекту
     '''
     try:
