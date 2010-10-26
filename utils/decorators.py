@@ -98,10 +98,11 @@ def task_respect_to_language(func):
     '''
     def wrapper(*args, **kwargs):
         language = kwargs.pop('language', None)
+        print language
         prev_language = translation.get_language()
         language and translation.activate(language)
         try:
             return func(*args, **kwargs)
         finally:
             translation.activate(prev_language)
-    return wraps(task(wrapper))
+    return wraps(func)(task(wrapper))
