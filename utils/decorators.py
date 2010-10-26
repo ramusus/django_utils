@@ -94,7 +94,7 @@ from django.utils import translation
 from celery.decorators import task
 def task_respect_to_language(func):
     '''
-    Decorator for
+    Decorator for tasks with respect to site's current language
     '''
     def wrapper(*args, **kwargs):
         language = kwargs.pop('language', None)
@@ -105,4 +105,7 @@ def task_respect_to_language(func):
             return func(*args, **kwargs)
         finally:
             translation.activate(prev_language)
+    wrapper.__doc__ = func.__doc__
+    wrapper.__name__ = func.__name__
+    wrapper.__module__ = func.__module__
     return wraps(func)(task(wrapper))
