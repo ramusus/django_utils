@@ -91,6 +91,7 @@ class AnonymousRequired( object ):
         return self.view_function( request, *args, **kwargs )
 
 from django.utils import translation
+from celery.decorators import task
 def task_respect_to_language(func):
     '''
     Decorator for
@@ -105,4 +106,4 @@ def task_respect_to_language(func):
         finally:
             translation.activate(prev_language)
 
-    return wraps(func)(wrapper)
+    return task(wrapper)
