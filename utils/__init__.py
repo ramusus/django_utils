@@ -2,14 +2,12 @@
 from django.core.serializers import json, serialize
 from django.db.models.query import QuerySet
 from django.http import HttpResponse
-from django.utils import simplejson
+from django.utils import simplejson, translation
 
 from decorators import render_to, ajax_required, json_success_error
 
 def is_language(code):
-    # important to import inside method, otherwise LANGUAGE_CODE willn't be actual
-    from django.conf import settings
-    return getattr(settings, 'LANGUAGE_CODE', '').find(code) > -1
+    return translation.get_language().find(code) > -1
 
 def dict_with_keys(dictionary, keys=[], **kwargs):
     return dict([(k,v) for k,v in dictionary.items() if k in keys], **kwargs)
@@ -44,7 +42,7 @@ def choose_plural(amount, variants):
 
 from django.utils.functional import Promise
 class JsonResponse(HttpResponse):
-    def __init__(self, object):
+    def __init__(self, object, content_type='application/json'):
         if isinstance(object, QuerySet):
             content = serialize('json', object)
         else:
@@ -56,10 +54,7 @@ class JsonResponse(HttpResponse):
             content = simplejson.dumps(
                 object, indent=2, cls=json.DjangoJSONEncoder,
                 ensure_ascii=False)
-        # if content_type='text/json' or content_type='application/json'
-        # jquery-ajax-form-plugin does'n work with file upload:
-        # window for download json file instead of success = function(json) {}
-        super(JsonResponse, self).__init__(content, content_type='text/html')
+        super(JsonResponse, self).__init__(content, content_type=content_type)
 
 import urllib
 import os

@@ -2,7 +2,23 @@
 from django.http import HttpResponseBadRequest
 from django.utils.functional import wraps
 
-def ajax_required(f):
+def opt_arguments(func):
+    '''
+    Meta-decorator for ablity use decorators with optional arguments
+    from here http://www.ellipsix.net/blog/2010/08/more-python-voodoo-optional-argument-decorators.html
+    '''
+    def meta_wrapper(*args, **kwargs):
+        if len(args) == 1 and callable(args[0]):
+            # No arguments, this is the decorator
+            # Set default values for the arguments
+            return func(args[0])
+        else:
+            def meta_func(inner_func):
+                return func(inner_func, *args, **kwargs)
+            return meta_func
+    return meta_wrapper
+
+def ajax_required(func):
     """
     AJAX request required decorator
     use it in your views:
@@ -12,38 +28,32 @@ def ajax_required(f):
         ....
 
     """
-    def wrap(request, *args, **kwargs):
+    def wrapper(request, *args, **kwargs):
         if not request.is_ajax() and not request.user.is_superuser and request.META.get('SERVER_NAME') != 'testserver':
             return HttpResponseBadRequest('Wrong type of request')
-        return f(request, *args, **kwargs)
-    wrap.__doc__=f.__doc__
-    wrap.__name__=f.__name__
-    return wrap
+        return func(request, *args, **kwargs)
+    return wraps(func)(wrapper)
 
-def json_success_error(func):
+@opt_arguments
+def json_success_error(func, content_type=None):
     '''
     Decorator for returning json string with success or error if exception in view raised
     '''
+    json_kwargs = {'content_type': content_type} if content_type else {}
     def wrapper(*args, **kwargs):
         from utils import JsonResponse
         try:
-            return JsonResponse({'success': func(*args, **kwargs)})
+            return JsonResponse({'success': func(*args, **kwargs)}, **json_kwargs)
         except Exception, e:
             try:
                 e = str(e)
             except:
                 e = unicode(e)
-            return JsonResponse({'error': e})
-
+            return JsonResponse({'error': e}, **json_kwargs)
     return wraps(func)(wrapper)
 
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
-#try:
-#    from jinja import render_to_response
-#except:
-#    pass
-
 def render_to(template):
     """
     Decorator for Django views that sends returned dict to render_to_response function
@@ -66,7 +76,7 @@ def render_to(template):
             elif isinstance(output, dict):
                 return render_to_response(template, output, RequestContext(request))
             return output
-        return wrapper
+        return wraps(func)(wrapper)
     return renderer
 
 '''
