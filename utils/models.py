@@ -69,7 +69,6 @@ class ModelNameFormCases(object):
         )
         cases = getattr(cls.VerboseNameFormCases, 'cases').split(',')
         if len(cases) == len(names):
-            cases = cases.split(',')
             for i, name_list in enumerate(names):
                 if case in name_list:
                     return cases[i]
