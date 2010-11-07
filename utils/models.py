@@ -51,7 +51,8 @@ class ModelNameFormCases(object):
         Method returns verbose name in special form defined as attributes of VerboseNameFormCases class.
             case - case of verbose_name
         '''
-        return getattr(cls.VerboseNameFormCases, case, False) or cls._get_russian_formcase(case) or cls._meta.verbose_name
+        name = getattr(cls.VerboseNameFormCases, case, False) or cls._get_russian_formcase(case) or cls._meta.verbose_name
+        return unicode(name)
 
     @classmethod
     def _get_russian_formcase(cls, case):
