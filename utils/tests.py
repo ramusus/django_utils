@@ -22,4 +22,21 @@ Content-Type: text/html
 {
   "error": "Error"
 }
+
+>>> from django.db import models
+>>> from utils.models import ModelNameFormCases
+>>> class MyModel(models.Model, ModelNameFormCases):
+...     class Meta:
+...         verbose_name = 'verbose_name'
+...     class VerboseNameFormCases:
+...         plural = 'plural_form'
+...         cases = '1case,2case,3case,4case,5case,6case'
+>>> MyModel.verbose_name_form('genitive')
+'2case'
+>>> MyModel.verbose_name_form('about')
+'6case'
+>>> MyModel.verbose_name_form('plural')
+'plural_form'
+>>> MyModel.verbose_name_form('error')
+'verbose_name'
 '''

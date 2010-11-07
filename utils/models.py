@@ -40,3 +40,37 @@ class ModelQuerySetManager(GenericFieldsManager):
 
     def __getattr__(self, name):
         return getattr(self.get_query_set(), name)
+
+class ModelNameFormCases(object):
+    '''
+    Parent class for all models with custom verbose names. Incapsulate classmethod for accessing to current name
+    '''
+    @classmethod
+    def verbose_name_form(cls, case):
+        '''
+        Method returns verbose name in special form defined as attributes of VerboseNameFormCases class.
+            case - case of verbose_name
+        '''
+        return getattr(cls.VerboseNameFormCases, case, False) or cls._get_russian_formcase(case) or cls._meta.verbose_name
+
+    @classmethod
+    def _get_russian_formcase(cls, case):
+        '''
+        Returns case of verbose name in VerboseNameFormCases.case attribute
+        There is 6 special predefined cases for Russian Languages:
+        '''
+        names = (
+            ('nominative', u'кто,что'),
+            ('genitive', u'кого,чего'),
+            ('dative', u'кому,чему'),
+            ('accusative', u'кого,что'),
+            ('instrumentative', u'кем,чем'),
+            ('preposition', u'о ком,о чем', 'about',),
+        )
+        cases = getattr(cls.VerboseNameFormCases, 'cases').split(',')
+        if len(cases) == len(names):
+            cases = cases.split(',')
+            for i, name_list in enumerate(names):
+                if case in name_list:
+                    return cases[i]
+        return False
