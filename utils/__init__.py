@@ -74,11 +74,11 @@ def download(url, filepath=False):
     localFile.close()
 
 import logging
-from settings import ROOT
 def log(message, file=False):
     '''
     Log message into specified file
     '''
+    from settings import ROOT
     file = ROOT + '/logs/' + str(file or 'default.log')
     handler = logging.FileHandler(file)
     handler.setFormatter(logging.Formatter('%(asctime)s %(message)s'))

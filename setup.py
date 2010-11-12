@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='django_utils',
+    name='django-utils',
     version='0.0.1',#__import__('utils').__version__,
     description='Set of tools and useful additions for Django Framework',
     long_description=open('README').read(),
