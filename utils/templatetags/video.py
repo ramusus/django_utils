@@ -6,6 +6,7 @@ import re
 register = template.Library()
 
 youtube_url_pattern = r'^(?:http://)?(?:www\.)?(?:youtube\.com/(?:watch\?v=|v/))?(?P<id>[A-Za-z0-9\-=_]{11})'
+ivi_url_pattern = r'^(?:http://)?(?:www\.)?ivi\.ru/video/player/\?videoId=(?P<id>[0-9]+)'
 
 def youtube_tag(video_id, width, height):
     return '''
@@ -13,6 +14,18 @@ def youtube_tag(video_id, width, height):
         <param name="movie" value="http://www.youtube.com/v/%s?fs=1"></param>
         <param name="allowFullScreen" value="true"></param>
         <embed src="http://www.youtube.com/v/%s?fs=1" type="application/x-shockwave-flash" allowfullscreen="true" wmode="opaque" width="%s" height="%s"></embed>
+    </object>
+    ''' % (width, height, video_id, video_id, width, height)
+
+def ivi_tag(video_id, width, height):
+    return '''
+    <object id="DigitalaccessVideoPlayer" classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" width="%s" height="%s">
+        <param name="movie" value="http://www.ivi.ru/video/player/?videoId=%s&_isB2C=1" />
+        <param name="allowScriptAccess" value="sameDomain" />
+        <param name="allowFullScreen" value="true" />
+        <param name="bgcolor" value="#000000" />
+        <param name="wmode" value="opaque" />
+        <embed src="http://www.ivi.ru/video/player/?videoId=%s" quality="high" allowscriptaccess="sameDomain" allowfullscreen="true" wmode="opaque"  width="%s" height="%s" type="application/x-shockwave-flash"></embed>
     </object>
     ''' % (width, height, video_id, video_id, width, height)
 
@@ -24,11 +37,26 @@ def youtube(url, sizes='465x278'):
     regex = re.compile(youtube_url_pattern)
     match = regex.match(url)
     if not match or not width or not height:
-        return ''
+        return url
     video_id = match.group('id')
     video_tag = youtube_tag(video_id, width, height)
     return mark_safe(video_tag)
 youtube.is_safe = True # Don't escape HTML
+
+@register.filter
+@stringfilter
+def ivi(url, sizes='465x278'):
+    (width, height) = sizes.split('x')
+    url = str(url)
+    regex = re.compile(ivi_url_pattern)
+    match = regex.match(url)
+    if not match or not width or not height:
+        return url
+    video_id = match.group('id')
+    video_tag = ivi_tag(video_id, width, height)
+    return mark_safe(video_tag)
+ivi.is_safe = True # Don't escape HTML
+
 
 # from here http://www.djangosnippets.org/snippets/212/
 
