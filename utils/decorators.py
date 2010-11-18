@@ -99,35 +99,3 @@ class AnonymousRequired( object ):
         if request.user is not None or request.user.is_authenticated():
             return HttpResponseRedirect( self.redirect_to )
         return self.view_function( request, *args, **kwargs )
-
-from django.utils import translation
-from celery.decorators import task
-from django.utils.functional import wraps
-def task_with_respect_to_language(func):
-    '''
-    Decorator for tasks with respect to site's current language.
-    You can use in tasks.py this decorator @task_respect_to_language instead of default @task
-    Be sure that task method have kwargs argument:
-
-        @task_respect_to_language
-        def my_task(...., **kwargs):
-            pass
-
-    You can call this task this way:
-
-        from django.utils import translation
-        tasks.my_task.delay(...., language=translation.get_language())
-    '''
-    def wrapper(*args, **kwargs):
-        language = kwargs.pop('language', None)
-        prev_language = translation.get_language()
-        language and translation.activate(language)
-        try:
-            return func(*args, **kwargs)
-        finally:
-            translation.activate(prev_language)
-
-    wrapper.__doc__ = func.__doc__
-    wrapper.__name__ = func.__name__
-    wrapper.__module__ = func.__module__
-    return wraps(func)(task(wrapper))
