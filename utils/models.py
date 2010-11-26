@@ -31,19 +31,29 @@ class GenericFieldsManager(models.Manager):
         kwargs = self.convert_generic(kwargs)
         return super(GenericFieldsManager, self).get(*args, **kwargs)
 
-class ModelQuerySetManager(GenericFieldsManager):
+def ModelQuerySetManager(ManagerBase=models.Manager):
     '''
-    Manager based on QuerySet class inside the model definition
+    Function that return Manager for using QuerySet class inside the model definition
+    @param ManagerBase - parent class Manager
     '''
-    def get_query_set(self):
-        return self.model.QuerySet(self.model)
+    if not issubclass(ManagerBase, models.Manager):
+        raise ValueError("Parent class for ModelQuerySetManager must be models.Manager or it's child")
 
-    def __getattr__(self, name):
-        return getattr(self.get_query_set(), name)
+    class Manager(ManagerBase):
+        '''
+        Manager based on QuerySet class inside the model definition
+        '''
+        def get_query_set(self):
+            return self.model.QuerySet(self.model)
+
+        def __getattr__(self, name):
+            return getattr(self.get_query_set(), name)
+
+    return Manager()
 
 class ModelNameFormCases(object):
     '''
-    Parent class for all models with custom verbose names. Incapsulate classmethod for accessing to current name
+    Parent class for all models with custom verbose names. Incapsulate classmethod verbose_name_form() for accessing to current name
     '''
     @classmethod
     def verbose_name_form(cls, case):
