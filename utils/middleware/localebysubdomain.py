@@ -18,8 +18,9 @@ class LocaleBySubdomainMiddleware(LocaleMiddleware):
             subdomain = re.sub(r'%s(:\d+)?$' % getattr(settings, 'ACCOUNT_DOMAIN', ''), '', request.META.get('HTTP_HOST', ''))
             if subdomain in settings.LANGUAGES_BY_DOMAIN.keys():
                 language = settings.LANGUAGES_BY_DOMAIN.get(subdomain)
-                if isinstance(language, tuple) and len(language) == 2:
-                    language, settings.SITE_ID = language
+
+        if isinstance(language, tuple) and len(language) == 2:
+            language, settings.SITE_ID = language
 
         translation.activate(language)
         request.LANGUAGE_CODE = translation.get_language()
