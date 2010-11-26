@@ -9,8 +9,8 @@ from decorators import render_to, ajax_required, json_success_error
 def is_language(code):
     return translation.get_language().find(code) > -1
 
-def dict_with_keys(dictionary, keys=[], **kwargs):
-    return dict([(k,v) for k,v in dictionary.items() if k in keys], **kwargs)
+def dict_with_keys(dictionary, keys=None, **kwargs):
+    return dict([(k,v) for k,v in dictionary.items() if k in (keys or [])], **kwargs)
 
 from pytils.numeral import get_plural as pytils_get_plural, choose_plural as pytils_choose_plural
 from django.utils.functional import Promise
