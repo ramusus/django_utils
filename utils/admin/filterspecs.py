@@ -21,9 +21,9 @@ class AlphabeticFilterSpec(ChoicesFilterSpec):
     my_model_field.alphabetic_filter = True
     """
 
-    def __init__(self, f, request, params, model, model_admin):
+    def __init__(self, f, request, params, model, model_admin, *args, **kwargs):
         super(AlphabeticFilterSpec, self).__init__(f, request, params, model,
-                                                   model_admin)
+                                                   model_admin, *args, **kwargs)
         self.lookup_kwarg = '%s__istartswith' % f.name
         self.lookup_val = request.GET.get(self.lookup_kwarg, None)
         values_list = model.objects.values_list(f.name, flat=True)
@@ -53,8 +53,8 @@ edited
 '''
 
 class NullFilterSpec(FilterSpec):
-    def __init__(self, f, request, params, model, model_admin):
-        super(NullFilterSpec, self).__init__(f, request, params, model, model_admin)
+    def __init__(self, f, request, *args, **kwargs):
+        super(NullFilterSpec, self).__init__(f, request, *args, **kwargs)
         self.lookup_kwarg = '%s__isnull' % f.name
         self.lookup_val = request.GET.get(self.lookup_kwarg, None)
 
@@ -73,8 +73,8 @@ FilterSpec.register(lambda f: f.null, NullFilterSpec)
 Фильтр кол-ва связанных объектов
 '''
 class CountRelatedFilterSpec(FilterSpec):
-    def __init__(self, f, request, params, model, model_admin):
-        super(CountRelatedFilterSpec, self).__init__(f, request, params, model, model_admin)
+    def __init__(self, f, request, *args, **kwargs):
+        super(CountRelatedFilterSpec, self).__init__(f, request, *args, **kwargs)
         self.lookup_kwarg = '%s__exact' % f.name
         self.lookup_kwarg2 = '%s__gte' % f.name
         self.lookup_val = request.GET.get(self.lookup_kwarg, None)
