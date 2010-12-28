@@ -133,9 +133,27 @@ class DynamicAdminInlines:
 
 from django.core.mail import EmailMessage
 import settings
-def send_mail_with_bcc(subject, message, emails_list, bcc_callback=lambda:[]):
+def send_mail_with_bcc(subject, message, recipients, bcc_callback=lambda:[]):
     '''
-    Like send_mail(), only with bcc feature
+    Like send_mail(), only with bcc header
     '''
-    email = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL, emails_list, bcc_callback())
+    email = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL, recipients, bcc_callback())
     email.send(fail_silently=True)
+
+from utils.templatetags.html import html2text, extract_urllinks
+def send_html_mail(subject, message_html, recipients, duplicate_to_admins=False):
+    '''
+    Wrapper for send_mail() or send_html_mail() from django-mailer if it's in installed apps
+    '''
+    admins = [a[1] for a in settings.ADMINS] if duplicate_to_admins else []
+    subject = settings.EMAIL_SUBJECT_PREFIX + subject
+    message_plaintext = html2text(extract_urllinks(message_html))
+
+    if 'mailer' in settings.INSTALLED_APPS:
+        from mailer import send_html_mail as send_html_mail_
+        return send_html_mail_(subject, message_plaintext, message_html, settings.DEFAULT_FROM_EMAIL, recipients, admins)
+    else:
+        from django.core.mail import EmailMultiAlternatives
+        email = EmailMultiAlternatives(subject, message_plaintext, settings.DEFAULT_FROM_EMAIL, recipients, admins)
+        email.attach_alternative(message_html, "text/html")
+        return email.send()
