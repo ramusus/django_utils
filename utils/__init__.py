@@ -146,7 +146,7 @@ def send_html_mail(subject, message_html, recipients, duplicate_to_admins=False)
     Wrapper for send_mail() or send_html_mail() from django-mailer if it's in installed apps
     '''
     admins = [a[1] for a in settings.ADMINS] if duplicate_to_admins else []
-    subject = settings.EMAIL_SUBJECT_PREFIX + subject
+    subject = settings.EMAIL_SUBJECT_PREFIX + subject.replace('\n', '')
     message_plaintext = html2text(extract_urllinks(message_html))
 
     if 'mailer' in settings.INSTALLED_APPS:
