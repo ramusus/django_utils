@@ -2,6 +2,7 @@
 from django import template
 from django.db.models.query import QuerySet
 from django.template.defaultfilters import stringfilter
+from django.conf import settings
 
 register = template.Library()
 
@@ -24,6 +25,29 @@ def abs_url_obj(object):
         return object.get_absolute_url()
     except:
         return '#'
+
+'''
+Absolute URL Templatetag
+from here http://djangosnippets.org/snippets/1518/
+'''
+import urlparse
+from django.template.defaulttags import URLNode, url
+from django.contrib.sites.models import Site
+
+class AbsoluteURLNode(URLNode):
+    def render(self, context):
+        path = super(AbsoluteURLNode, self).render(context)
+        domain = "http://%s" % Site.objects.get_current().domain
+        return urlparse.urljoin(domain, path)
+
+def abs_url(parser, token, node_cls=AbsoluteURLNode):
+    """Just like {% url %} but ads the domain of the current site."""
+    node_instance = url(parser, token)
+    return node_cls(view_name=node_instance.view_name,
+        args=node_instance.args,
+        kwargs=node_instance.kwargs,
+        asvar=node_instance.asvar)
+abs_url = register.tag(abs_url)
 
 @register.simple_tag
 def join(objects, delimeter=', ', url=True, lower=False):
