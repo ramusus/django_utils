@@ -271,3 +271,25 @@ def textile_fix_dashes(value):
         value = value.replace(match, '%s%s%s' % (before, symbol, after))
     value = textile(value).replace('shortdash;','-')
     return mark_safe(value)
+
+'''
+From here http://djangosnippets.org/snippets/620/
+'''
+@register.tag
+def smartspaceless(parser, token):
+    nodelist = parser.parse(('endsmartspaceless',))
+    parser.delete_first_token()
+    return SmartSpacelessNode(nodelist)
+
+class SmartSpacelessNode(template.Node):
+    def __init__(self, nodelist):
+        self.nodelist = nodelist
+
+    def render(self, context):
+        s = self.nodelist.render(context).strip()
+        inline_tags = 'a|b|i|u|em|strong|sup|sub|tt|font|small|big'
+        inlines_with_spaces = r'</(%s)>\s+<(%s)\b' % (inline_tags, inline_tags)
+        s = re.sub(inlines_with_spaces, r'</\1>&#preservespace;<\2', s)
+        s = re.sub(r'>\s+<', '><', s)
+        s = s.replace('&#preservespace;', ' ')
+        return s
