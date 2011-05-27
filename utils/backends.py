@@ -4,15 +4,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import get_model
 
-class CustomUserModelBackend(ModelBackend):
-    def authenticate(self, username=None, password=None):
-        try:
-            user = self.user_class.objects.get(username=username)
-            if user.check_password(password):
-                return user
-        except self.user_class.DoesNotExist:
-            return None
-
+class CustomUserInterface(object):
     def get_user(self, user_id):
         try:
             return self.user_class.objects.get(pk=user_id)
@@ -29,6 +21,27 @@ class CustomUserModelBackend(ModelBackend):
             else:
                 self._user_class = User
         return self._user_class
+
+class CustomUserModelBackend(ModelBackend, CustomUserInterface):
+    '''
+    Extending django.auth.ModelBackend to allow use custom user model
+    '''
+    def authenticate(self, username=None, password=None):
+        try:
+            user = self.user_class.objects.get(username=username)
+            if user.check_password(password):
+                return user
+        except self.user_class.DoesNotExist:
+            return None
+
+if 'netauth' in settings.INSTALLED_APPS:
+    '''
+    Extending netauth.auth.NetBackend to allow use custom user model
+    '''
+    from netauth.auth import NetBackend
+    class CustomUserNetBackend(NetBackend, CustomUserInterface):
+        pass
+
 
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import User

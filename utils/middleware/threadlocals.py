@@ -16,6 +16,9 @@ def set_current_user(user):
     _thread_locals.user = user or AnonymousUser()
 
 def _get_admin_user():
+    '''
+    Returns admin user in cases where request variable does not exists (console terminal)
+    '''
     try:
         assert settings.DEBUG
         return User.objects.get(username=settings.ADMINS[0][0])
