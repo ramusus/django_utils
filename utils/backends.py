@@ -22,7 +22,7 @@ class CustomUserInterface(object):
                 self._user_class = User
         return self._user_class
 
-class CustomUserModelBackend(ModelBackend, CustomUserInterface):
+class CustomUserModelBackend(CustomUserInterface, ModelBackend):
     '''
     Extending django.auth.ModelBackend to allow use custom user model
     '''
@@ -39,7 +39,7 @@ if 'netauth' in settings.INSTALLED_APPS:
     Extending netauth.auth.NetBackend to allow use custom user model
     '''
     from netauth.auth import NetBackend
-    class CustomUserNetBackend(NetBackend, CustomUserInterface):
+    class CustomUserNetBackend(CustomUserInterface, NetBackend):
         pass
 
 
