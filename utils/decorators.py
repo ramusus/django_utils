@@ -60,6 +60,8 @@ def render_to(template):
     with given template and RequestContext as context instance.
 
     If view doesn't return dict then decorator simply returns output.
+    If returned dict contains key '_cookies' with list of dictionaries, decorator
+    will tries to response.set_cookie() using each dictionary from this list.
     Additionally view can return two-tuple, which must contain dict as first
     element and string with template name as second. This string will
     override template name, given as parameter
