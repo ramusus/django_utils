@@ -70,12 +70,38 @@ def render_to(template):
     """
     def renderer(func):
         def wrapper(request, *args, **kw):
+            template_name = False
             output = func(request, *args, **kw)
             if isinstance(output, (list, tuple)):
-                return render_to_response(output[1], output[0], RequestContext(request))
+                template_name = output[1]
+                context = output[0]
             elif isinstance(output, dict):
-                return render_to_response(template, output, RequestContext(request))
-            return output
+                context = output
+                template_name = template
+
+            if template_name and context:
+                # manage cookies in dict output
+                cookies = []
+                if '_cookies' in context:
+                    cookies = context.pop('_cookies')
+
+                response = render_to_response(template_name, context, RequestContext(request))
+                for cookie in cookies:
+                    # https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse.set_cookie
+                    response.set_cookie(
+                        key = cookie['key'],
+                        value = cookie.get('value'),
+                        max_age = cookie.get('max_age'),
+                        expires = cookie.get('expires'),
+                        path = cookie.get('path', '/'),
+                        domain = cookie.get('domain'),
+                        secure = cookie.get('secure'),
+                        httponly = cookie.get('httponly', False)
+                    )
+                return response
+            else:
+                return output
+
         return wraps(func)(wrapper)
     return renderer
 
