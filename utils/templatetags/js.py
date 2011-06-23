@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django import template
 from jspacker import JavaScriptPacker
-from settings import DEBUG
+from django.conf import settings
 
 register = template.Library()
 
@@ -28,7 +28,7 @@ class PackedJSNode(template.Node):
         p = JavaScriptPacker()
         script = self.nodelist.render(context).strip()
         #ugly test on empty script, no reason to pack such small scripts
-        if 1 or DEBUG == False or len(script) < 20:
+        if 1 or settings.DEBUG == False or len(script) < 20:
             return self.get_tags_around(script)
         packed = p.pack(script, compaction=False, encoding=62, fastDecode=True)
         return self.get_tags_around(packed)
