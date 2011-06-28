@@ -133,9 +133,9 @@ class DynamicAdminInlines:
 
 from django.core.mail import EmailMessage
 import settings
-def send_mail_with_bcc(subject, message, emails_list, bcc_callback=lambda:[]):
+def send_mail_with_bcc(subject, message, recipients, bcc_callback=lambda:[]):
     '''
-    Like send_mail(), only with bcc feature
+    Like send_mail(), only with bcc header
     '''
-    email = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL, emails_list, bcc_callback())
+    email = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL, recipients, bcc_callback())
     email.send(fail_silently=True)

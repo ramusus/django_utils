@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django import forms
 from django.conf import settings
+from django.utils import formats
 from django.utils.safestring import mark_safe
 from django.utils.encoding import force_unicode
 import datetime, time
@@ -63,7 +64,7 @@ class DateTimeWidget(forms.widgets.TextInput):
         return mark_safe(a)
 
     def value_from_datadict(self, data, files, name):
-        dtf = forms.fields.DEFAULT_DATETIME_INPUT_FORMATS
+        dtf = formats.get_format('DATETIME_INPUT_FORMATS')
         empty_values = forms.fields.EMPTY_VALUES
 
         value = data.get(name, None)

@@ -53,7 +53,7 @@ through {% extends ... %} tags.
 
 from django import template
 from django.template import resolve_variable, FilterExpression
-from django.template.loader import get_template, get_template_from_string, find_template_source
+from django.template.loader import get_template
 from django.conf import settings
 import re
 

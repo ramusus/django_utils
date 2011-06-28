@@ -73,24 +73,24 @@ def youtubize(value, sizes='425x250'):
     (width, height) = sizes.split('x')
     text = value
     # Configuration for urlize() function
-    LEADING_PUNCTUATION  = ['(', '<', '&lt;']
-    TRAILING_PUNCTUATION = ['.', ',', ')', '>', '\n', '&gt;']
+    LEADING_PUNCTUATION  = ['(', '&lt;']
+    TRAILING_PUNCTUATION = ['.', ',', ')', '\n', '&gt;']
     word_split_re = re.compile(r'(\s+)')
     punctuation_re = re.compile('^(?P<lead>(?:%s)*)(?P<middle>.*?)(?P<trail>(?:%s)*)$' % \
             ('|'.join([re.escape(x) for x in LEADING_PUNCTUATION]),
             '|'.join([re.escape(x) for x in TRAILING_PUNCTUATION])))
-    youtube_re = re.compile ('http://www.youtube.com/watch.v=(?P<videoid>(.+))')
+    youtube_re = re.compile('http://www.youtube.com/watch.v=(?P<videoid>([^<>]+))')
 
     words = word_split_re.split(text)
     for i, word in enumerate(words):
         match = punctuation_re.match(word)
         if match:
             lead, middle, trail = match.groups()
-            if middle.startswith('http://www.youtube.com/watch') or middle.startswith('http://youtube.com/watch'):
-                video_match = youtube_re.match(middle)
+            if middle.find('youtube.com') != -1:
+                video_match = youtube_re.search(middle)
                 if video_match:
                     video_id = video_match.groups()[1]
-                    middle = youtube_tag(video_id, width, height)
+                    middle = '<p>%s</p>' % youtube_tag(video_id, width, height)
 
             if lead + middle + trail != word:
                 words[i] = lead + middle + trail
