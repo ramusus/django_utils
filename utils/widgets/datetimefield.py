@@ -9,13 +9,18 @@ import datetime, time
 '''
 DateTimeWidget using JSCal2 from http://www.dynarch.com/projects/calendar/
 '''
+try:
+    icopath = settings.ADMIN_MEDIA_PREFIX
+except:
+    icopath = settings.MEDIA_URL + 'admin/'
+
 if 'grappelli' in settings.INSTALLED_APPS:
-    ico = 'admin/img/icons/icon-datepicker.png'
+    ico = '%simg/icons/icon-datepicker.png' % icopath
 else:
-    ico = 'admin/img/admin/icon_calendar.gif'
+    ico = '%simg/admin/icon_calendar.gif' % icopath
 
 # DATETIMEWIDGET
-calbtn = u"""<img src="%(static)s%(ico)s" alt="calendar" id="%(id)s_btn" style="cursor: pointer;" title="Выберите дату" />
+calbtn = u"""<img src="%(ico)s" alt="calendar" id="%(id)s_btn" style="cursor: pointer;" title="Выберите дату" />
 <script type="text/javascript">
     Calendar.setup({
         inputField     :    "%(id)s",
@@ -55,7 +60,6 @@ class DateTimeWidget(forms.widgets.TextInput):
 
         jsdformat = self.dformat #.replace('%', '%%')
         cal = calbtn % {
-            'static': settings.STATIC_URL,
             'id': id,
             'jsdformat': jsdformat,
             'ico': ico,
