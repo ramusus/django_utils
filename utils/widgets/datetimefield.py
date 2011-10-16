@@ -23,9 +23,10 @@ else:
 calbtn = u"""<img src="%(ico)s" alt="calendar" id="%(id)s_btn" style="cursor: pointer;" title="Выберите дату" />
 <script type="text/javascript">
     Calendar.setup({
-        inputField     :    "%(id)s",
-        dateFormat     :    "%(jsdformat)s",
-        trigger        :    "%(id)s_btn"
+        inputField: "%(id)s",
+        dateFormat: "%(jsdformat)s",
+        trigger: "%(id)s_btn",
+        onSelect: function() { this.hide() }
     });
 </script>"""
 
