@@ -1,4 +1,5 @@
 from django.contrib.admin.widgets import ForeignKeyRawIdWidget
+from django.contrib.admin import AdminSite
 from django.utils.safestring import mark_safe
 import re
 
@@ -14,6 +15,7 @@ class ForeignKeyRawIdReadonlyWidget(ForeignKeyRawIdWidget):
     def __init__(self, rel, popup_choice=True, show_id=True, **kwargs):
         self.popup_choice = popup_choice
         self.show_id = show_id
+        kwargs['admin_site'] = AdminSite()
         super(ForeignKeyRawIdReadonlyWidget, self).__init__(rel, **kwargs)
 
     def render(self, name, value, attrs=None):
