@@ -9,14 +9,24 @@ import datetime, time
 '''
 DateTimeWidget using JSCal2 from http://www.dynarch.com/projects/calendar/
 '''
+try:
+    icopath = settings.ADMIN_MEDIA_PREFIX
+except:
+    icopath = settings.MEDIA_URL + 'admin/'
+
+if 'grappelli' in settings.INSTALLED_APPS:
+    ico = '%simg/icons/icon-datepicker.png' % icopath
+else:
+    ico = '%simg/admin/icon_calendar.gif' % icopath
 
 # DATETIMEWIDGET
-calbtn = u"""<img src="%smedia/admin/img/admin/icon_calendar.gif" alt="calendar" id="%s_btn" style="cursor: pointer;" title="Выберите дату" />
+calbtn = u"""<img src="%(ico)s" alt="calendar" id="%(id)s_btn" style="cursor: pointer;" title="Выберите дату" />
 <script type="text/javascript">
     Calendar.setup({
-        inputField     :    "%s",
-        dateFormat     :    "%s",
-        trigger        :    "%s_btn"
+        inputField: "%(id)s",
+        dateFormat: "%(jsdformat)s",
+        trigger: "%(id)s_btn",
+        onSelect: function() { this.hide() }
     });
 </script>"""
 
@@ -50,7 +60,11 @@ class DateTimeWidget(forms.widgets.TextInput):
         id = final_attrs['id']
 
         jsdformat = self.dformat #.replace('%', '%%')
-        cal = calbtn % (settings.MEDIA_URL, id, id, jsdformat, id)
+        cal = calbtn % {
+            'id': id,
+            'jsdformat': jsdformat,
+            'ico': ico,
+        }
         a = u'<input%s />%s%s' % (forms.util.flatatt(final_attrs), self.media, cal)
         return mark_safe(a)
 

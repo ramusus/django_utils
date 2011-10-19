@@ -293,3 +293,26 @@ class SmartSpacelessNode(template.Node):
         s = re.sub(r'>\s+<', '><', s)
         s = s.replace('&#preservespace;', ' ')
         return s
+
+
+@register.filter
+def add_finish_link(value, arg):
+    """
+    Add link to the end of text
+
+    Receives a parameter separated by spaces where each field means:
+    - number: number of words which necessary to wrap into link
+    - url: url for link
+    """
+    try:
+        args = arg.split(' ')
+        assert len(args) == 2
+        number = int(args[0])
+        url = args[1]
+    except ValueError: # Invalid literal for int().
+        return value
+    except AssertionError: # More than 2 arguments
+        return value
+
+    words = value.split(' ')
+    return '%s <a href="%s">%s</a>' % (' '.join(words[:-number]), url, ' '.join(words[-number:]))
