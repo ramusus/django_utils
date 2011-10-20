@@ -36,8 +36,14 @@ class ForeignCountField(CompositionField):
     def instance_getter(self, foreign):
         ''' Return instance getter with special check for generic relation '''
         instance = getattr(foreign, self.link_back_name)
-        if not instance and self.link_back_name == 'content_object':
-            instance = foreign.content_type.get_object_for_this_type(id=foreign.object_id)
+        if not instance:
+            # check generic fields
+            for field in foreign._meta.virtual_fields:
+                if field.name == self.link_back_name:
+                    content_type = getattr(foreign, field.ct_field)
+                    object_id = getattr(foreign, field.fk_field)
+                    instance = content_type.get_object_for_this_type(id=object_id)
+                    break
         return instance
 
     def south_field_triple(self):
