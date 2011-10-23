@@ -26,6 +26,7 @@ class CustomUserModelBackend(CustomUserInterface, ModelBackend):
     '''
     Extending django.auth.ModelBackend to allow use custom user model
     '''
+    supports_inactive_user = False
     def authenticate(self, username=None, password=None):
         try:
             user = self.user_class.objects.get(username=username)
@@ -40,7 +41,7 @@ if 'netauth' in settings.INSTALLED_APPS:
     '''
     from netauth.auth import NetBackend
     class CustomUserNetBackend(CustomUserInterface, NetBackend):
-        pass
+        supports_inactive_user = False
 
 
 from django.contrib.auth.backends import ModelBackend
@@ -52,6 +53,7 @@ except:
     from django.forms.fields import email_re
 
 class EmailBackend(CustomUserModelBackend):
+    supports_inactive_user = False
     def authenticate(self, username=None, password=None):
         if email_re.search(username):
             kwargs = {'email': username}
