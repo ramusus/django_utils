@@ -20,17 +20,26 @@ else:
     ico = '%simg/admin/icon_calendar.gif' % icopath
 
 # DATETIMEWIDGET
-calbtn = u"""<img src="%(ico)s" alt="calendar" id="%(id)s_btn" style="cursor: pointer;" title="Выберите дату" />
+calbtn = u"""<img src="%(ico)s" alt="calendar" style="cursor: pointer;" title="Выберите дату" />
 <script type="text/javascript">
+    String.prototype.ucfirst = function() {
+        return this.substr(0, 1).toUpperCase() + this.substr(1);
+    }
     Calendar.setup({
         inputField: "%(id)s",
         dateFormat: "%(jsdformat)s",
         trigger: "%(id)s_btn",
-        onSelect: function() { this.hide() }
+        onSelect: function() { this.hide() },
+        onChange: function() {
+            var date = $('#%(id)s').val().toString();
+            date = new Date(date.substr(0,4), date.substr(5,2), date.substr(8,2));
+            $('#%(id)s_human_value').text(Calendar.printDate(date, '%%B %%e, %%Y').ucfirst());
+        }
     });
 </script>"""
 
 class DateTimeWidget(forms.widgets.TextInput):
+    input_type = 'hidden'
     class Media:
         css = {
             'all': (
@@ -65,7 +74,17 @@ class DateTimeWidget(forms.widgets.TextInput):
             'jsdformat': jsdformat,
             'ico': ico,
         }
-        a = u'<input%s />%s%s' % (forms.util.flatatt(final_attrs), self.media, cal)
+        a = u'''%(media)s
+            <input%(input_attr)s />
+            <span id="%(id)s_btn">
+                <span id="%(id)s_human_value"></span>
+                %(ico)s
+            </span>''' % {
+                'media': self.media,
+                'input_attr': forms.util.flatatt(final_attrs),
+                'id': id,
+                'ico': cal,
+            }
         return mark_safe(a)
 
     def value_from_datadict(self, data, files, name):
