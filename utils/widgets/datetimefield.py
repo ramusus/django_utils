@@ -12,12 +12,12 @@ DateTimeWidget using JSCal2 from http://www.dynarch.com/projects/calendar/
 try:
     icopath = settings.ADMIN_MEDIA_PREFIX
 except:
-    icopath = settings.MEDIA_URL + 'admin/'
+    icopath = settings.STATIC_URL + 'admin/'
 
 if 'grappelli' in settings.INSTALLED_APPS:
     ico = '%simg/icons/icon-datepicker.png' % icopath
 else:
-    ico = '%simg/admin/icon_calendar.gif' % icopath
+    ico = '%sadmin/img/icon_calendar.gif' % icopath
 
 # DATETIMEWIDGET
 calbtn = u"""<img src="%(ico)s" alt="calendar" style="cursor: pointer;" title="Выберите дату" />
@@ -32,8 +32,10 @@ calbtn = u"""<img src="%(ico)s" alt="calendar" style="cursor: pointer;" title="�
         onSelect: function() { this.hide() },
         onChange: function() {
             var date = $('#%(id)s').val().toString();
-            date = new Date(date.substr(0,4), date.substr(5,2), date.substr(8,2));
-            $('#%(id)s_human_value').text(Calendar.printDate(date, '%%B %%e, %%Y').ucfirst());
+            if(date) {
+                date = new Date(date.substr(0,4), date.substr(5,2), date.substr(8,2));
+                $('#%(id)s_human_value').text(Calendar.printDate(date, '%%B %%e, %%Y').ucfirst());
+            }
         }
     });
 </script>"""
