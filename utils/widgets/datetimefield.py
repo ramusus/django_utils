@@ -4,6 +4,7 @@ from django.conf import settings
 from django.utils import formats
 from django.utils.safestring import mark_safe
 from django.utils.encoding import force_unicode
+from django.utils.translation import ugettext as _
 import datetime, time
 
 '''
@@ -15,30 +16,11 @@ except:
     icopath = settings.STATIC_URL + 'admin/'
 
 if 'grappelli' in settings.INSTALLED_APPS:
-    ico = '%simg/icons/icon-datepicker.png' % icopath
+    ico_calendar = '%simg/icons/icon-datepicker.png' % icopath
+    ico_cross = '%simg/icons/icon-tools-delete-handler-hover.png' % icopath
 else:
-    ico = '%sadmin/img/icon_calendar.gif' % icopath
-
-# DATETIMEWIDGET
-calbtn = u"""<img src="%(ico)s" alt="calendar" style="cursor: pointer;" title="Выберите дату" />
-<script type="text/javascript">
-    String.prototype.ucfirst = function() {
-        return this.substr(0, 1).toUpperCase() + this.substr(1);
-    }
-    Calendar.setup({
-        inputField: "%(id)s",
-        dateFormat: "%(jsdformat)s",
-        trigger: "%(id)s_btn",
-        onSelect: function() { this.hide() },
-        onChange: function() {
-            var date = $('#%(id)s').val().toString();
-            if(date) {
-                date = new Date(date.substr(0,4), date.substr(5,2), date.substr(8,2));
-                $('#%(id)s_human_value').text(Calendar.printDate(date, '%%B %%e, %%Y').ucfirst());
-            }
-        }
-    });
-</script>"""
+    ico_calendar = '%sadmin/img/icon_calendar.gif' % icopath
+    ico_cross = '%sadmin/img/icon_deletelink.gif' % icopath
 
 class DateTimeWidget(forms.widgets.TextInput):
     input_type = 'hidden'
@@ -70,24 +52,62 @@ class DateTimeWidget(forms.widgets.TextInput):
             final_attrs['id'] = u'%s_id' % (name)
         id = final_attrs['id']
 
-        jsdformat = self.dformat #.replace('%', '%%')
-        cal = calbtn % {
-            'id': id,
-            'jsdformat': jsdformat,
-            'ico': ico,
-        }
-        a = u'''%(media)s
-            <input%(input_attr)s />
+        html = u'''<input%(input_attr)s />
             <span id="%(id)s_btn">
+                <img src="%(ico_calendar)s" alt="%(ico_calendar_desc)s" title="%(ico_calendar_desc)s" />
                 <span id="%(id)s_human_value"></span>
-                %(ico)s
-            </span>''' % {
+                <img src="%(ico_cross)s" class="ico-calendar-cross"  alt="%(ico_cross_desc)s" title="%(ico_cross_desc)s" />
+            </span>
+            <style>
+                span#%(id)s_btn {cursor: pointer;}
+                span#%(id)s_btn img {margin-right: 5px;}
+                span#%(id)s_btn img.ico-calendar-cross {margin-left: 5px;}
+            </style>
+            %(media)s
+            <script type="text/javascript">
+                String.prototype.ucfirst = function() {
+                    return this.substr(0, 1).toUpperCase() + this.substr(1);
+                }
+                String.prototype.title = function() {
+                    var words = this.split(' ');
+                    for(i=0; i<words.length; i++) {
+                        words[i] = words[i].ucfirst();
+                    }
+                    return words.join(' ');
+                }
+                var calendar = Calendar.setup({
+                    inputField: "%(id)s",
+                    dateFormat: "%(jsdformat)s",
+                    trigger: "%(id)s_btn",
+                    onSelect: function() { this.hide() },
+                    onChange: function() {
+                        if(!this.selection.isEmpty()) {
+                            $('#%(id)s_human_value').text(this.selection.print('%%A, %%B %%e, %%Y')[0].title());
+                            $('#%(id)s_btn img.ico-calendar-cross').show();
+                        } else {
+                            $('#%(id)s_btn img.ico-calendar-cross').hide();
+                        }
+                    }
+                });
+                $('#%(id)s_btn img.ico-calendar-cross').click(function(e) {
+                    e.stopPropagation();
+                    calendar.selection.clear();
+                    $('input#%(id)s').val('');
+                    $('#%(id)s_human_value').text('');
+                    $('#%(id)s_btn img.ico-calendar-cross').hide();
+                    return false;
+                });
+            </script>''' % {
                 'media': self.media,
                 'input_attr': forms.util.flatatt(final_attrs),
                 'id': id,
-                'ico': cal,
+                'jsdformat': self.dformat,
+                'ico_calendar': ico_calendar,
+                'ico_cross': ico_cross,
+                'ico_calendar_desc': _('Select date'),
+                'ico_cross_desc': _('Clear date'),
             }
-        return mark_safe(a)
+        return mark_safe(html)
 
     def value_from_datadict(self, data, files, name):
         dtf = formats.get_format('DATETIME_INPUT_FORMATS')
