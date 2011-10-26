@@ -75,13 +75,11 @@ class DateTimeWidget(forms.widgets.TextInput):
                     }
                     return words.join(' ');
                 }
-                var default_date = $('#%(id)s').val().toString();
-                var calendar = Calendar.setup({
+                var calendar_setup = {
                     inputField: "%(id)s",
                     dateFormat: "%(jsdformat)s",
                     trigger: "%(id)s_btn",
                     onSelect: function() { this.hide() },
-                    selection: default_date ? new Date(default_date.substr(0,4), default_date.substr(5,2)-1, default_date.substr(8,2)) : undefined,
                     onChange: function() {
                         if(!this.selection.isEmpty()) {
                             $('#%(id)s_human_value').text(this.selection.print('%%A, %%B %%e, %%Y')[0].title());
@@ -90,7 +88,12 @@ class DateTimeWidget(forms.widgets.TextInput):
                             $('#%(id)s_btn img.ico-calendar-cross').hide();
                         }
                     }
-                });
+                }
+                var default_date = $('#%(id)s').val().toString();
+                if(default_date) {
+                    calendar_setup['selection'] = new Date(default_date.substr(0,4), default_date.substr(5,2)-1, default_date.substr(8,2));
+                }
+                var calendar = Calendar.setup(calendar_setup);
                 $('#%(id)s_btn img.ico-calendar-cross').click(function(e) {
                     e.stopPropagation();
                     calendar.selection.clear();
