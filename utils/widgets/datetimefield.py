@@ -38,6 +38,12 @@ class DateTimeWidget(forms.widgets.TextInput):
         )
 
     dformat = '%Y-%m-%d'
+    default_human_value = ''
+
+    def __init__(self, default_human_value='', *args, **kwargs):
+        self.default_human_value = default_human_value
+        super(DateTimeWidget, self).__init__(*args, **kwargs)
+
     def render(self, name, value, attrs=None):
         if value is None: value = ''
         final_attrs = self.build_attrs(attrs, type=self.input_type, name=name)
@@ -55,7 +61,7 @@ class DateTimeWidget(forms.widgets.TextInput):
         html = u'''<input%(input_attr)s />
             <span id="%(id)s_btn">
                 <img src="%(ico_calendar)s" alt="%(ico_calendar_desc)s" title="%(ico_calendar_desc)s" />
-                <span id="%(id)s_human_value"></span>
+                <span id="%(id)s_human_value">%(default_human_value)s</span>
                 <img src="%(ico_cross)s" class="ico-calendar-cross"  alt="%(ico_cross_desc)s" title="%(ico_cross_desc)s" />
             </span>
             <style>
@@ -66,7 +72,7 @@ class DateTimeWidget(forms.widgets.TextInput):
             %(media)s
             <script type="text/javascript">
                 String.prototype.ucfirst = function() {
-                    return this.substr(0, 1).toUpperCase() + this.substr(1);
+                    return this.substr(0, 1).toUpperCase() + this.substr(1);text
                 }
                 String.prototype.title = function() {
                     var words = this.split(' ');
@@ -98,7 +104,7 @@ class DateTimeWidget(forms.widgets.TextInput):
                     e.stopPropagation();
                     calendar.selection.clear();
                     $('input#%(id)s').val('');
-                    $('#%(id)s_human_value').text('');
+                    $('#%(id)s_human_value').text('%(default_human_value)s');
                     $('#%(id)s_btn img.ico-calendar-cross').hide();
                     return false;
                 });
@@ -111,6 +117,7 @@ class DateTimeWidget(forms.widgets.TextInput):
                 'ico_cross': ico_cross,
                 'ico_calendar_desc': _('Select date'),
                 'ico_cross_desc': _('Clear date'),
+                'default_human_value': self.default_human_value,
             }
         return mark_safe(html)
 
