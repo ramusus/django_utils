@@ -26,7 +26,7 @@ urlpatterns += patterns('',
 
 """
 from django.core.urlresolvers import reverse
-from django.contrib.syndication.feeds import Feed
+from django.contrib.syndication.views import Feed
 from django.contrib.sites.models import Site
 from django.utils.feedgenerator import Rss201rev2Feed
 from django.utils.http import urlquote
