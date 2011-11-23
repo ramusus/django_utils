@@ -19,8 +19,8 @@ if 'grappelli' in settings.INSTALLED_APPS:
     ico_calendar = '%simg/icons/icon-datepicker.png' % icopath
     ico_cross = '%simg/icons/icon-tools-delete-handler-hover.png' % icopath
 else:
-    ico_calendar = '%sadmin/img/icon_calendar.gif' % icopath
-    ico_cross = '%sadmin/img/icon_deletelink.gif' % icopath
+    ico_calendar = '%simg/icon_calendar.gif' % icopath
+    ico_cross = '%simg/icon_deletelink.gif' % icopath
 
 class DateTimeWidget(forms.widgets.TextInput):
     input_type = 'hidden'
