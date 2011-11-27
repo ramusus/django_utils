@@ -214,6 +214,26 @@ def ru_strftime_month(date, format="%B", inflected_day=False, preposition=False)
         res = default_value % {'error': err, 'value': default_distance}
     return res
 
+@register.filter(name='int')
+def to_integer(value):
+    '''
+    Convert value to integer
+    '''
+    return int(value)
+
+@register.filter(name='str')
+def to_string(value):
+    '''
+    Convert value to string
+    '''
+    return str(value)
+
+#@register.filter
+#def dev(value):
+#    '''
+#    Convert value to decimal
+#    '''
+#    return dec(value)
 
 '''
 from here http://stackoverflow.com/questions/1259219/django-datefield-to-unix-timestamp
