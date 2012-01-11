@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.http import HttpResponseBadRequest
 from django.utils.functional import wraps
+from django.conf import settings
 
 def opt_arguments(func):
     '''
@@ -96,7 +97,7 @@ def render_to(template):
                         max_age = cookie.get('max_age'),
                         expires = cookie.get('expires'),
                         path = cookie.get('path', '/'),
-                        domain = cookie.get('domain'),
+                        domain = cookie.get('domain') or getattr(settings, 'SESSION_COOKIE_DOMAIN', None),
                         secure = cookie.get('secure'),
                         httponly = cookie.get('httponly', False)
                     )
@@ -118,8 +119,7 @@ def anonymous_required( view_function, redirect_to = None ):
 class AnonymousRequired( object ):
     def __init__( self, view_function, redirect_to ):
         if redirect_to is None:
-            from django.conf import settings
-            redirect_to = settings.LOGIN_REDIRECT_URL
+            redirect_to = getattr(settings, 'LOGIN_REDIRECT_URL')
         self.view_function = view_function
         self.redirect_to = redirect_to
 
