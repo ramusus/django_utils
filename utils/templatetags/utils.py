@@ -336,3 +336,19 @@ def add_finish_link(value, arg):
 
     words = value.split(' ')
     return '%s <a href="%s">%s</a>' % (' '.join(words[:-number]), url, ' '.join(words[-number:]))
+
+'''
+Unescape filter from https://code.djangoproject.com/attachment/ticket/4555/django-unescape.patch
+'''
+from django.utils.safestring import mark_for_escaping
+
+def unescape(html):
+    "Returns the given HTML with ampersands, quotes and carets decoded"
+    html = unicode(html)
+    return html.replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"').replace('&#39;',"'")
+
+@register.filter(name='unescape')
+@stringfilter
+def unescape_filter(value):
+    "Unescapes a string's HTML"
+    return unescape(value)
