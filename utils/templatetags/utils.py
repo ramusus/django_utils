@@ -228,6 +228,13 @@ def to_string(value):
     '''
     return str(value)
 
+@register.filter(name='plus')
+def plus(value, argument):
+    '''
+    Plus argument to value
+    '''
+    return value + int(argument)
+
 #@register.filter
 #def dev(value):
 #    '''
