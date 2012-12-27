@@ -267,6 +267,7 @@ def percentage(fraction, population):
 from here http://stackoverflow.com/questions/346467/format-numbers-in-django-templates
 '''
 from django.utils.encoding import force_unicode
+from django.utils.safestring import mark_safe
 import re
 @register.filter('intspace')
 def intspace(value):
@@ -278,9 +279,9 @@ def intspace(value):
     orig = force_unicode(value)
     new = re.sub("^(-?\d+)(\d{3})", '\g<1> \g<2>', orig)
     if orig == new:
-        return new
+        return mark_safe(new)
     else:
-        return intspace(new)
+        return mark_safe(intspace(new))
 
 
 from django.contrib.markup.templatetags.markup import textile
