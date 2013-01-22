@@ -228,6 +228,13 @@ def to_string(value):
     '''
     return str(value)
 
+@register.filter(name='plus')
+def plus(value, argument):
+    '''
+    Plus argument to value
+    '''
+    return value + int(argument)
+
 #@register.filter
 #def dev(value):
 #    '''
@@ -256,15 +263,26 @@ def percentage(fraction, population):
     except ValueError:
         return ''
 
-from django.contrib.humanize.templatetags.humanize import intcomma
-@register.filter()
+'''
+from here http://stackoverflow.com/questions/346467/format-numbers-in-django-templates
+'''
+from django.utils.encoding import force_unicode
+from django.utils.safestring import mark_safe
+import re
+@register.filter('intspace')
 def intspace(value):
     """
     Converts an integer to a string containing spaces every three digits.
     For example, 3000 becomes '3 000' and 45000 becomes '45 000'.
-    Requires django.contrib.humanize
+    See django.contrib.humanize app
     """
-    return intcomma(value).replace(',',' ')
+    orig = force_unicode(value)
+    new = re.sub("^(-?\d+)(\d{3})", '\g<1> \g<2>', orig)
+    if orig == new:
+        return mark_safe(new)
+    else:
+        return mark_safe(intspace(new))
+
 
 from django.contrib.markup.templatetags.markup import textile
 from django.utils.safestring import mark_safe
