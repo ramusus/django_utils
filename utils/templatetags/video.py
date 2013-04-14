@@ -6,7 +6,7 @@ import urllib2
 
 register = template.Library()
 
-youtube_url_pattern = r'^(?:https?://)?(?:www\.)?(?:youtube\.com/(?:watch\?(?:.+)v=|v/))?(?P<id>[A-Za-z0-9\-=_]{11})'
+youtube_url_pattern = r'^(?:https?://)?(?:www\.)?(?:youtube\.com/(?:watch\?(?:.*)v=|v/))?(?P<id>[A-Za-z0-9\-=_]{11})'
 ivi_url_pattern = r'^(?:https?://)?(?:www\.)?ivi\.ru/video/player/\?videoId=(?P<id>[0-9]+)'
 kinopoisk_url_pattern = r'^(?:https?://)?(?:tr\.)?kinopoisk\.ru/(?P<id>.+)'
 
