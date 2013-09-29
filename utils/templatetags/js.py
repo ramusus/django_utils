@@ -67,13 +67,17 @@ def jscript(parser, token):
 Filter for JSON data
 '''
 
-from django.core.serializers import json, serialize
-from django.utils import simplejson
+from django.core.serializers import serialize
+from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.safestring import mark_safe
 from django.db.models.query import QuerySet
+try:
+    import json
+except ImportError:
+    from django.utils import simplejson as json
 
 @register.filter(name='json')
 def jsonify(object):
     if isinstance(object, QuerySet):
         return serialize('json', object)
-    return mark_safe(simplejson.dumps(object, indent=2, cls=json.DjangoJSONEncoder, ensure_ascii=False))
+    return mark_safe(json.dumps(object, indent=2, cls=DjangoJSONEncoder, ensure_ascii=False))

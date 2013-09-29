@@ -39,6 +39,11 @@ class GenericFieldsManager(models.Manager, ConvertGenericMixin):
         args, kwargs = self.convert_generic(args, kwargs)
         return super(GenericFieldsManager, self).get(*args, **kwargs)
 
+    def only(self, *args, **kwargs):
+        # TODO: it seems doesn't work
+        args, kwargs = self.convert_generic(args, kwargs)
+        return super(GenericFieldsManager, self).only(*args, **kwargs)
+
     def distinct(self, *args, **kwargs):
         args, kwargs = self.convert_generic(args, kwargs)
         return super(GenericFieldsManager, self).distinct(*args, **kwargs)
@@ -62,6 +67,11 @@ class GenericFieldsQuerySet(QuerySet, ConvertGenericMixin):
     def get(self, *args, **kwargs):
         args, kwargs = self.convert_generic(args, kwargs)
         return super(GenericFieldsQuerySet, self).get(*args, **kwargs)
+
+    def only(self, *args, **kwargs):
+        # TODO: it seems doesn't work
+        args, kwargs = self.convert_generic(args, kwargs)
+        return super(GenericFieldsQuerySet, self).only(*args, **kwargs)
 
     def distinct(self, *args, **kwargs):
         args, kwargs = self.convert_generic(args, kwargs)
