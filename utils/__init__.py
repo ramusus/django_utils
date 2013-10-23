@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
-from django.core.serializers import json, serialize
+from django.core.serializers import serialize
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.query import QuerySet
 from django.http import HttpResponse
-from django.utils import simplejson, translation
+from django.utils import translation
+
+try:
+    import json
+except ImportError:
+    from django.utils import simplejson as json
 
 from decorators import render_to, ajax_required, json_success_error
 
@@ -51,8 +57,8 @@ class JsonResponse(HttpResponse):
                 for key, val in object.items():
                     if isinstance(val, Promise):
                         object[key] = unicode(val)
-            content = simplejson.dumps(
-                object, indent=2, cls=json.DjangoJSONEncoder,
+            content = json.dumps(
+                object, indent=2, cls=DjangoJSONEncoder,
                 ensure_ascii=False)
         super(JsonResponse, self).__init__(content, content_type=content_type)
 
