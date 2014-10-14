@@ -284,7 +284,6 @@ def intspace(value):
         return mark_safe(intspace(new))
 
 
-from django.contrib.markup.templatetags.markup import textile
 from django.utils.safestring import mark_safe
 
 @register.filter
@@ -295,6 +294,7 @@ def textile_fix_dashes(value):
     >>> textile_fix_dashes('2000-2009 2000--2009 first - second first -- second first-second :-)')
     u'<p>2000&ndash;2009 2000&ndash;2009 first &mdash; second first &mdash; second first-second :-)</p>'
     '''
+    from textile import textile
     for match, before, dash, after in re.findall(r'((.)(\-{1,2})(.))', value):
         if before == after == ' ':
             symbol = '&mdash;'
