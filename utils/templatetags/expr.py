@@ -1,5 +1,9 @@
+'''
+from here https://djangosnippets.org/snippets/9/ with my own update for exnteded inclusion_tags templates
+'''
 from django import template
 from django.utils.translation import gettext_lazy as _
+from django.template.context import RequestContext
 import re
 
 register = template.Library()
@@ -16,7 +20,11 @@ class ExprNode(template.Node):
             d = {}
             d['_'] = _
             for c in clist:
-                d.update(c)
+                if isinstance(c, RequestContext):
+                    for item in c.dicts:
+                        d.update(item)
+                else:
+                    d.update(c)
             if self.var_name:
                 context[self.var_name] = eval(self.expr_string, d)
                 return ''
