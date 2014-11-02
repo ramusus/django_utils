@@ -131,3 +131,65 @@ class ModelNameFormCases(object):
                 if case in name_list:
                     return cases[i]
         return False
+
+
+
+'''
+From here https://djangosnippets.org/snippets/1079/
+my updates:
+    renamed field `id`->`pk`
+    added `field_names` attribute
+    added `select_related` attribute
+
+'''
+
+from django.db.models.query import QuerySet
+from django.db.models import Manager
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.generic import GenericForeignKey
+
+
+class GFKManager(Manager):
+    """
+    A manager that returns a GFKQuerySet instead of a regular QuerySet.
+
+    """
+    def get_query_set(self):
+        return GFKQuerySet(self.model)
+
+
+class GFKQuerySet(QuerySet):
+    """
+    A QuerySet with a fetch_generic_relations() method to bulk fetch
+    all generic related items.  Similar to select_related(), but for
+    generic foreign keys.
+
+    Based on http://www.djangosnippets.org/snippets/984/
+    """
+    def select_generic_related(self, field_names=None, select_related=None):
+        qs = self._clone()
+
+        gfk_fields = [g for g in self.model._meta.virtual_fields
+                      if isinstance(g, GenericForeignKey) and (field_names is None or g.name in field_names)]
+
+        if not select_related:
+            select_related = tuple()
+        elif not field_names:
+            raise Exception("You should define attribute `field_names` in case of defined attribute `select_related`")
+
+        ct_map = {}
+        item_map = {}
+
+        for item in qs:
+            for gfk in gfk_fields:
+                ct_id_field = self.model._meta.get_field(gfk.ct_field).column
+                ct_map.setdefault((ct_id_field, getattr(item, ct_id_field)), {})[getattr(item, gfk.fk_field)] = (gfk.name, item.pk)
+            item_map[item.pk] = item
+
+        for (ct_id_field, ct_id), items_ in ct_map.items():
+            ct = ContentType.objects.get_for_id(ct_id)
+            for o in ct.model_class().objects.select_related(*select_related).filter(pk__in=items_.keys()).all():
+                (gfk_name, item_id) = items_[o.pk]
+                setattr(item_map[item_id], gfk_name, o)
+
+        return qs

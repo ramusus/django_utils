@@ -138,7 +138,8 @@ class DynamicAdminInlines:
         css = { 'all' : ['css/dynamic_inlines_with_sort.css'], }
 
 from django.core.mail import EmailMessage
-import settings
+from django.conf import settings
+
 def send_mail_with_bcc(subject, message, recipients, bcc_callback=lambda:[]):
     '''
     Like send_mail(), only with bcc header
