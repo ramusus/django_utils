@@ -4,6 +4,18 @@ from django.db.models.query import QuerySet
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 
+
+class GenericFieldsModelMixin(object):
+
+    def __init__(self, *args, **kwargs):
+        super(GenericFieldsModelMixin, self).__init__(*args, **kwargs)
+
+        virtual_fields = [field.name for field in self._meta.virtual_fields]
+        for key, value in kwargs.items():
+            if key in virtual_fields:
+                setattr(self, '_%s_cache' % key, value)
+
+
 class ConvertGenericMixin():
     def convert_generic(self, args, kwargs):
         for field in self.model._meta.virtual_fields:
@@ -18,6 +30,7 @@ class ConvertGenericMixin():
                     args += [field.ct_field, field.fk_field]
                     args = tuple(args)
         return args, kwargs
+
 
 class GenericFieldsManager(models.Manager, ConvertGenericMixin):
     '''
@@ -48,6 +61,7 @@ class GenericFieldsManager(models.Manager, ConvertGenericMixin):
         args, kwargs = self.convert_generic(args, kwargs)
         return super(GenericFieldsManager, self).distinct(*args, **kwargs)
 
+
 class GenericFieldsQuerySet(QuerySet, ConvertGenericMixin):
     '''
     Subclass for filter by GenericForeignKey field in filter, exclude requests
@@ -76,6 +90,7 @@ class GenericFieldsQuerySet(QuerySet, ConvertGenericMixin):
     def distinct(self, *args, **kwargs):
         args, kwargs = self.convert_generic(args, kwargs)
         return super(GenericFieldsQuerySet, self).distinct(*args, **kwargs)
+
 
 def ModelQuerySetManager(ManagerBase=models.Manager):
     '''
