@@ -6,6 +6,7 @@ from django.conf import settings
 
 register = template.Library()
 
+
 @register.simple_tag
 def url_obj(object):
     '''
@@ -15,6 +16,7 @@ def url_obj(object):
         return getattr(object, 'url', object.get_absolute_url())
     except:
         return '#'
+
 
 @register.simple_tag
 def abs_url_obj(object):
@@ -34,20 +36,24 @@ import urlparse
 from django.template.defaulttags import URLNode, url
 from django.contrib.sites.models import Site
 
+
 class AbsoluteURLNode(URLNode):
+
     def render(self, context):
         path = super(AbsoluteURLNode, self).render(context)
         domain = "http://%s" % Site.objects.get_current().domain
         return urlparse.urljoin(domain, path)
 
+
 def abs_url(parser, token, node_cls=AbsoluteURLNode):
     """Just like {% url %} but ads the domain of the current site."""
     node_instance = url(parser, token)
     return node_cls(view_name=node_instance.view_name,
-        args=node_instance.args,
-        kwargs=node_instance.kwargs,
-        asvar=node_instance.asvar)
+                    args=node_instance.args,
+                    kwargs=node_instance.kwargs,
+                    asvar=node_instance.asvar)
 abs_url = register.tag(abs_url)
+
 
 @register.simple_tag
 def join(objects, delimeter=', ', url=True, lower=False):
@@ -73,6 +79,7 @@ def join(objects, delimeter=', ', url=True, lower=False):
 
     return delimeter.join(list)
 
+
 @register.simple_tag
 def select(objects, name, class_name='', null_sign=False):
     '''
@@ -86,17 +93,18 @@ def select(objects, name, class_name='', null_sign=False):
 
     if isinstance(objects, QuerySet):
         for object in objects:
-           str += option_tag % (object.id, object.__unicode__())
+            str += option_tag % (object.id, object.__unicode__())
     else:
         for id, value in objects:
-           str += option_tag % (id, value)
+            str += option_tag % (id, value)
 
-    str = '<select %s name="%s">%s</select>' % (class_name and 'class="%s"' % class_name or '', name, str);
+    str = '<select %s name="%s">%s</select>' % (class_name and 'class="%s"' % class_name or '', name, str)
     return str
 
 '''
 from http://www.djangosnippets.org/snippets/1702/
 '''
+
 
 @register.filter(name='indent')
 @stringfilter
@@ -111,7 +119,7 @@ def indent(value, arg=1):
     """
     import re
     regex = re.compile("^", re.M)
-    return re.sub(regex, "\t"*int(arg), value)
+    return re.sub(regex, "\t" * int(arg), value)
 
 '''
 from http://github.com/sku/python-twitter-ircbot/blob/321d94e0e40d0acc92f5bf57d126b57369da70de/html_decode.py
@@ -119,6 +127,7 @@ from http://github.com/sku/python-twitter-ircbot/blob/321d94e0e40d0acc92f5bf57d1
 
 from htmlentitydefs import name2codepoint as n2cp
 import re
+
 
 @register.filter(name='decode_entities')
 @stringfilter
@@ -143,12 +152,14 @@ foo < bar
                 return unichr(int(ent))
             elif match.group(2) == 'x':
                 # number is in hex
-                return unichr(int('0x'+ent, 16))
+                return unichr(int('0x' + ent, 16))
         else:
             # they were using a name
             cp = n2cp.get(ent)
-            if cp: return unichr(cp)
-            else: return match.group()
+            if cp:
+                return unichr(cp)
+            else:
+                return match.group()
 
     entity_re = re.compile(r'&(#?)(x?)(\w+);')
     return entity_re.subn(substitute_entity, string)[0]
@@ -158,6 +169,8 @@ from django.utils.datetime_safe import strftime
 from django.utils.translation import ugettext as _
 import datetime
 from .. import is_language
+
+
 @register.filter
 def smart_time(date):
     """
@@ -192,6 +205,8 @@ from django import template, conf
 from pytils import dt
 from pytils.templatetags import pseudo_str, pseudo_unicode
 encoding = conf.settings.DEFAULT_CHARSET  #: Current charset (sets in Django project's settings)
+
+
 @register.filter
 def ru_strftime_month(date, format="%B", inflected_day=False, preposition=False):
     """
@@ -214,6 +229,7 @@ def ru_strftime_month(date, format="%B", inflected_day=False, preposition=False)
         res = default_value % {'error': err, 'value': default_distance}
     return res
 
+
 @register.filter(name='int')
 def to_integer(value):
     '''
@@ -221,12 +237,14 @@ def to_integer(value):
     '''
     return int(value)
 
+
 @register.filter(name='str')
 def to_string(value):
     '''
     Convert value to string
     '''
     return str(value)
+
 
 @register.filter(name='plus')
 def plus(value, argument):
@@ -236,7 +254,7 @@ def plus(value, argument):
     return value + int(argument)
 
 #@register.filter
-#def dev(value):
+# def dev(value):
 #    '''
 #    Convert value to decimal
 #    '''
@@ -246,16 +264,20 @@ def plus(value, argument):
 from here http://stackoverflow.com/questions/1259219/django-datefield-to-unix-timestamp
 '''
 import time
+
+
 @register.filter
 def epoch(value):
     try:
-        return int(time.mktime(value.timetuple())*1000)
+        return int(time.mktime(value.timetuple()) * 1000)
     except AttributeError:
         return ''
 
 '''
 from here http://www.jongales.com/blog/2009/10/19/percentage-django-template-tag/
 '''
+
+
 @register.filter(name='percentage')
 def percentage(fraction, population):
     try:
@@ -269,6 +291,8 @@ from here http://stackoverflow.com/questions/346467/format-numbers-in-django-tem
 from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
 import re
+
+
 @register.filter('intspace')
 def intspace(value):
     """
@@ -285,6 +309,7 @@ def intspace(value):
 
 
 from django.utils.safestring import mark_safe
+
 
 @register.filter
 @stringfilter
@@ -307,19 +332,23 @@ def textile_fix_dashes(value):
                 symbol = 'shortdash;'
 
         value = value.replace(match, '%s%s%s' % (before, symbol, after))
-    value = textile(value).replace('shortdash;','-')
+    value = textile(value).replace('shortdash;', '-')
     return mark_safe(value)
 
 '''
 From here http://djangosnippets.org/snippets/620/
 '''
+
+
 @register.tag
 def smartspaceless(parser, token):
     nodelist = parser.parse(('endsmartspaceless',))
     parser.delete_first_token()
     return SmartSpacelessNode(nodelist)
 
+
 class SmartSpacelessNode(template.Node):
+
     def __init__(self, nodelist):
         self.nodelist = nodelist
 
@@ -347,9 +376,9 @@ def add_finish_link(value, arg):
         assert len(args) == 2
         number = int(args[0])
         url = args[1]
-    except ValueError: # Invalid literal for int().
+    except ValueError:  # Invalid literal for int().
         return value
-    except AssertionError: # More than 2 arguments
+    except AssertionError:  # More than 2 arguments
         return value
 
     words = value.split(' ')
@@ -360,13 +389,30 @@ Unescape filter from https://code.djangoproject.com/attachment/ticket/4555/djang
 '''
 from django.utils.safestring import mark_for_escaping
 
+
 def unescape(html):
     "Returns the given HTML with ampersands, quotes and carets decoded"
     html = unicode(html)
-    return html.replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"').replace('&#39;',"'")
+    return html.replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"').replace('&#39;', "'")
+
 
 @register.filter(name='unescape')
 @stringfilter
 def unescape_filter(value):
     "Unescapes a string's HTML"
     return unescape(value)
+
+
+# from here http://stackoverflow.com/questions/12806276/django-get-contenttype-in-a-template
+
+from django import template
+from django.contrib.contenttypes.models import ContentType
+
+register = template.Library()
+
+
+@register.filter
+def content_type(obj):
+    if not obj:
+        return False
+    return ContentType.objects.get_for_model(obj)

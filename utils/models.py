@@ -16,7 +16,33 @@ class GenericFieldsModelMixin(object):
                 setattr(self, '_%s_cache' % key, value)
 
 
-class ConvertGenericMixin():
+class ConvertGenericMixin(object):
+
+    def filter(self, *args, **kwargs):
+        args, kwargs = self.convert_generic(args, kwargs)
+        return super(ConvertGenericMixin, self).filter(*args, **kwargs)
+
+    def exclude(self, *args, **kwargs):
+        args, kwargs = self.convert_generic(args, kwargs)
+        return super(ConvertGenericMixin, self).exclude(*args, **kwargs)
+
+    def get_or_create(self, *args, **kwargs):
+        args, kwargs = self.convert_generic(args, kwargs)
+        return super(ConvertGenericMixin, self).get_or_create(*args, **kwargs)
+
+    def get(self, *args, **kwargs):
+        args, kwargs = self.convert_generic(args, kwargs)
+        return super(ConvertGenericMixin, self).get(*args, **kwargs)
+
+    def only(self, *args, **kwargs):
+        # TODO: it seems doesn't work
+        args, kwargs = self.convert_generic(args, kwargs)
+        return super(ConvertGenericMixin, self).only(*args, **kwargs)
+
+    def distinct(self, *args, **kwargs):
+        args, kwargs = self.convert_generic(args, kwargs)
+        return super(ConvertGenericMixin, self).distinct(*args, **kwargs)
+
     def convert_generic(self, args, kwargs):
         for field in self.model._meta.virtual_fields:
             if isinstance(field, generic.GenericForeignKey):
@@ -32,64 +58,20 @@ class ConvertGenericMixin():
         return args, kwargs
 
 
-class GenericFieldsManager(models.Manager, ConvertGenericMixin):
+class GenericFieldsManager(ConvertGenericMixin, models.Manager):
+
     '''
     Subclass for filter by GenericForeignKey field in filter, exclude requests
     '''
-    def filter(self, *args, **kwargs):
-        args, kwargs = self.convert_generic(args, kwargs)
-        return super(GenericFieldsManager, self).filter(*args, **kwargs)
-
-    def exclude(self, *args, **kwargs):
-        args, kwargs = self.convert_generic(args, kwargs)
-        return super(GenericFieldsManager, self).exclude(*args, **kwargs)
-
-    def get_or_create(self, *args, **kwargs):
-        args, kwargs = self.convert_generic(args, kwargs)
-        return super(GenericFieldsManager, self).get_or_create(*args, **kwargs)
-
-    def get(self, *args, **kwargs):
-        args, kwargs = self.convert_generic(args, kwargs)
-        return super(GenericFieldsManager, self).get(*args, **kwargs)
-
-    def only(self, *args, **kwargs):
-        # TODO: it seems doesn't work
-        args, kwargs = self.convert_generic(args, kwargs)
-        return super(GenericFieldsManager, self).only(*args, **kwargs)
-
-    def distinct(self, *args, **kwargs):
-        args, kwargs = self.convert_generic(args, kwargs)
-        return super(GenericFieldsManager, self).distinct(*args, **kwargs)
+    pass
 
 
-class GenericFieldsQuerySet(QuerySet, ConvertGenericMixin):
+class GenericFieldsQuerySet(ConvertGenericMixin, QuerySet):
+
     '''
     Subclass for filter by GenericForeignKey field in filter, exclude requests
     '''
-    def filter(self, *args, **kwargs):
-        args, kwargs = self.convert_generic(args, kwargs)
-        return super(GenericFieldsQuerySet, self).filter(*args, **kwargs)
-
-    def exclude(self, *args, **kwargs):
-        args, kwargs = self.convert_generic(args, kwargs)
-        return super(GenericFieldsQuerySet, self).exclude(*args, **kwargs)
-
-    def get_or_create(self, *args, **kwargs):
-        args, kwargs = self.convert_generic(args, kwargs)
-        return super(GenericFieldsQuerySet, self).get_or_create(*args, **kwargs)
-
-    def get(self, *args, **kwargs):
-        args, kwargs = self.convert_generic(args, kwargs)
-        return super(GenericFieldsQuerySet, self).get(*args, **kwargs)
-
-    def only(self, *args, **kwargs):
-        # TODO: it seems doesn't work
-        args, kwargs = self.convert_generic(args, kwargs)
-        return super(GenericFieldsQuerySet, self).only(*args, **kwargs)
-
-    def distinct(self, *args, **kwargs):
-        args, kwargs = self.convert_generic(args, kwargs)
-        return super(GenericFieldsQuerySet, self).distinct(*args, **kwargs)
+    pass
 
 
 def ModelQuerySetManager(ManagerBase=models.Manager):
@@ -101,9 +83,11 @@ def ModelQuerySetManager(ManagerBase=models.Manager):
         raise ValueError("Parent class for ModelQuerySetManager must be models.Manager or it's child")
 
     class Manager(ManagerBase):
+
         '''
         Manager based on QuerySet class inside the model definition
         '''
+
         def get_query_set(self):
             return self.model.QuerySet(self.model)
 
@@ -113,7 +97,9 @@ def ModelQuerySetManager(ManagerBase=models.Manager):
 
     return Manager()
 
+
 class ModelNameFormCases(object):
+
     '''
     Parent class for all models with custom verbose names. Incapsulate classmethod verbose_name_form() for accessing to current name
     '''
@@ -123,7 +109,8 @@ class ModelNameFormCases(object):
         Method returns verbose name in special form defined as attributes of VerboseNameFormCases class.
             case - case of verbose_name
         '''
-        name = getattr(cls.VerboseNameFormCases, case, False) or cls._get_russian_formcase(case) or cls._meta.verbose_name
+        name = getattr(cls.VerboseNameFormCases, case, False) or cls._get_russian_formcase(
+            case) or cls._meta.verbose_name
         return unicode(name)
 
     @classmethod
@@ -148,7 +135,6 @@ class ModelNameFormCases(object):
         return False
 
 
-
 '''
 From here https://djangosnippets.org/snippets/1079/
 my updates:
@@ -165,15 +151,18 @@ from django.contrib.contenttypes.generic import GenericForeignKey
 
 
 class GFKManager(Manager):
+
     """
     A manager that returns a GFKQuerySet instead of a regular QuerySet.
 
     """
+
     def get_query_set(self):
         return GFKQuerySet(self.model)
 
 
 class GFKQuerySet(QuerySet):
+
     """
     A QuerySet with a fetch_generic_relations() method to bulk fetch
     all generic related items.  Similar to select_related(), but for
@@ -181,6 +170,7 @@ class GFKQuerySet(QuerySet):
 
     Based on http://www.djangosnippets.org/snippets/984/
     """
+
     def select_generic_related(self, field_names=None, select_related=None):
         qs = self._clone()
 
@@ -198,7 +188,8 @@ class GFKQuerySet(QuerySet):
         for item in qs:
             for gfk in gfk_fields:
                 ct_id_field = self.model._meta.get_field(gfk.ct_field).column
-                ct_map.setdefault((ct_id_field, getattr(item, ct_id_field)), {})[getattr(item, gfk.fk_field)] = (gfk.name, item.pk)
+                ct_map.setdefault((ct_id_field, getattr(item, ct_id_field)), {})[
+                    getattr(item, gfk.fk_field)] = (gfk.name, item.pk)
             item_map[item.pk] = item
 
         for (ct_id_field, ct_id), items_ in ct_map.items():
