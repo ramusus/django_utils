@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-from django.db import models
-from django.db.models.query import QuerySet
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.generic import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+from django.db import models
+from django.db.models import Manager
+from django.db.models.query import QuerySet
 
 
 class GenericFieldsModelMixin(object):
@@ -60,65 +62,66 @@ class ConvertGenericMixin(object):
 
 class GenericFieldsManager(ConvertGenericMixin, models.Manager):
 
-    '''
+    """
     Subclass for filter by GenericForeignKey field in filter, exclude requests
-    '''
+    """
     pass
 
 
 class GenericFieldsQuerySet(ConvertGenericMixin, QuerySet):
 
-    '''
+    """
     Subclass for filter by GenericForeignKey field in filter, exclude requests
-    '''
+    """
     pass
 
 
 def ModelQuerySetManager(ManagerBase=models.Manager):
-    '''
+    """
     Function that return Manager for using QuerySet class inside the model definition
     @param ManagerBase - parent class Manager
-    '''
+    """
     if not issubclass(ManagerBase, models.Manager):
         raise ValueError("Parent class for ModelQuerySetManager must be models.Manager or it's child")
 
     class Manager(ManagerBase):
-
-        '''
+        """
         Manager based on QuerySet class inside the model definition
-        '''
-
-        def get_query_set(self):
+        """
+        def get_queryset(self):
             return self.model.QuerySet(self.model)
 
-        # this method cause memory overfull in admin
-#        def __getattr__(self, name):
-#            return getattr(self.get_query_set(), name)
+        # this method cause memory overfull in admin and make one more expensive query
+        def __getattr__(self, name):
+            if name[0] != '_':
+                return getattr(self.get_queryset(), name)
+            else:
+                raise AttributeError()
 
     return Manager()
 
 
 class ModelNameFormCases(object):
 
-    '''
+    """
     Parent class for all models with custom verbose names. Incapsulate classmethod verbose_name_form() for accessing to current name
-    '''
+    """
     @classmethod
     def verbose_name_form(cls, case):
-        '''
+        """
         Method returns verbose name in special form defined as attributes of VerboseNameFormCases class.
             case - case of verbose_name
-        '''
+        """
         name = getattr(cls.VerboseNameFormCases, case, False) or cls._get_russian_formcase(
             case) or cls._meta.verbose_name
         return unicode(name)
 
     @classmethod
     def _get_russian_formcase(cls, case):
-        '''
+        """
         Returns case of verbose name in VerboseNameFormCases.case attribute
         There is 6 special predefined cases for Russian Languages:
-        '''
+        """
         names = (
             ('nominative', u'кто,что'),
             ('genitive', u'кого,чего'),
@@ -135,19 +138,15 @@ class ModelNameFormCases(object):
         return False
 
 
-'''
+"""
 From here https://djangosnippets.org/snippets/1079/
 my updates:
     renamed field `id`->`pk`
     added `field_names` attribute
     added `select_related` attribute
 
-'''
+"""
 
-from django.db.models.query import QuerySet
-from django.db.models import Manager
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes.generic import GenericForeignKey
 
 
 class GFKManager(Manager):

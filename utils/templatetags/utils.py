@@ -408,9 +408,6 @@ def unescape_filter(value):
 from django import template
 from django.contrib.contenttypes.models import ContentType
 
-register = template.Library()
-
-
 @register.filter
 def content_type(obj):
     if not obj:

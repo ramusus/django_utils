@@ -46,20 +46,17 @@ if 'netauth' in settings.INSTALLED_APPS:
 
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import User
-try:
-    ''' after django 1.2 alfa release '''
-    from django.core.validators import email_re
-except:
-    from django.forms.fields import email_re
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 
 class EmailBackend(CustomUserModelBackend):
     supports_inactive_user = False
     def authenticate(self, username=None, password=None):
-        if email_re.search(username):
+        try:
+            validate_email(username)
             kwargs = {'email': username}
-        else:
+        except ValidationError:
             kwargs = {'username': username}
-
         try:
             user = self.user_class.objects.get(**kwargs)
             if user.check_password(password):

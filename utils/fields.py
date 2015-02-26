@@ -3,25 +3,22 @@ from django.db import models
 
 class ForeignCountField(CompositionField):
 
-    link_back_name = None
-    link_to_foreign_name = None
-    filter = {}
-    distinct = False
+    signal_default = (models.signals.post_save, models.signals.post_delete)
 
-    def __init__(self, model, link_back_name, link_to_foreign_name, filter={}, native=None, signal=None, verbose_name=None, distinct=False):
-        self.model = model
+    def __init__(self, model, link_back_name, link_to_foreign_name, filter=None, native=None, signal=None, verbose_name=None, distinct=False):
+        self.rel_model = model
         self.link_back_name = link_back_name
         self.link_to_foreign_name = link_to_foreign_name
-        self.filter = filter
+        self.filter = filter or {}
         self.distinct = distinct
         self.native = native or models.PositiveIntegerField(default=0, db_index=True, verbose_name=verbose_name)
-        self.signal = signal or (models.signals.post_save, models.signals.post_delete)
+        self.signal = signal or self.signal_default
 
         self.internal_init(
             native = self.native,
             trigger = dict(
                 on = self.signal,
-                sender_model = self.model,
+                sender_model = self.rel_model,
                 do = self.do,
                 field_holder_getter = self.instance_getter
             )
@@ -54,3 +51,19 @@ class ForeignCountField(CompositionField):
         args, kwargs = introspector(self._c_native)
         # That's our definition!
         return (field_class, args, kwargs)
+
+    def deconstruct(self):
+        name, path, args, kwargs = super(ForeignCountField, self).deconstruct()
+        del kwargs['default']
+        del kwargs['db_index']
+
+        kwargs['model'] = self.rel_model
+        kwargs['link_back_name'] = self.link_back_name
+        kwargs['link_to_foreign_name'] = self.link_back_name
+        kwargs['filter'] = self.filter
+        kwargs['distinct'] = self.distinct
+        kwargs['native'] = self.native
+        if self.signal != self.signal_default:
+            kwargs['signal'] = self.signal
+
+        return name, 'utils.fields.ForeignCountField', args, kwargs

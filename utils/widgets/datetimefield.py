@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
+import datetime
+import time
+
 from django import forms
 from django.conf import settings
 from django.utils import formats
 from django.utils.safestring import mark_safe
 from django.utils.encoding import force_unicode
 from django.utils.translation import ugettext as _
-import datetime, time
 
-'''
+"""
 DateTimeWidget using JSCal2 from http://www.dynarch.com/projects/calendar/
-'''
+"""
 try:
     icopath = settings.ADMIN_MEDIA_PREFIX
 except:
@@ -22,19 +24,21 @@ else:
     ico_calendar = '%simg/icon_calendar.gif' % icopath
     ico_cross = '%simg/icon_deletelink.gif' % icopath
 
+
 class DateTimeWidget(forms.widgets.TextInput):
-    input_type = 'hidden'
+    input_type = 'text'
+
     class Media:
         css = {
             'all': (
-                    'css/calendar/jscal2.css',
-                    'css/calendar/border-radius.css',
-                    'css/calendar/win2k/win2k.css',
-                    )
+                'css/calendar/jscal2.css',
+                'css/calendar/border-radius.css',
+                'css/calendar/win2k/win2k.css',
+            )
         }
         js = (
-              'js/calendar/jscal2.js',
-              'js/calendar/lang/ru.js',
+            'js/calendar/jscal2.js',
+            'js/calendar/lang/ru.js',
         )
 
     dformat = '%Y-%m-%d'
@@ -45,20 +49,19 @@ class DateTimeWidget(forms.widgets.TextInput):
         super(DateTimeWidget, self).__init__(*args, **kwargs)
 
     def render(self, name, value, attrs=None):
-        if value is None: value = ''
+        if value is None:
+            value = ''
         final_attrs = self.build_attrs(attrs, type=self.input_type, name=name)
         if value != '':
             try:
-                final_attrs['value'] = \
-                                   force_unicode(value.strftime(self.dformat))
+                final_attrs['value'] = force_unicode(value.strftime(self.dformat))
             except:
-                final_attrs['value'] = \
-                                   force_unicode(value)
+                final_attrs['value'] = force_unicode(value)
         if not final_attrs.has_key('id'):
             final_attrs['id'] = u'%s_id' % (name)
         id = final_attrs['id']
 
-        html = u'''<input%(input_attr)s />
+        html = u"""<input%(input_attr)s />
             <span id="%(id)s_btn">
                 <img src="%(ico_calendar)s" alt="%(ico_calendar_desc)s" title="%(ico_calendar_desc)s" />
                 <span id="%(id)s_human_value">%(default_human_value)s</span>
@@ -69,7 +72,6 @@ class DateTimeWidget(forms.widgets.TextInput):
                 span#%(id)s_btn img {margin-right: 5px;}
                 span#%(id)s_btn img.ico-calendar-cross {margin-left: 5px;}
             </style>
-            %(media)s
             <script type="text/javascript">
                 String.prototype.ucfirst = function() {
                     return this.substr(0, 1).toUpperCase() + this.substr(1);text
@@ -108,17 +110,16 @@ class DateTimeWidget(forms.widgets.TextInput):
                     $('#%(id)s_btn img.ico-calendar-cross').hide();
                     return false;
                 });
-            </script>''' % {
-                'media': self.media,
-                'input_attr': forms.util.flatatt(final_attrs),
-                'id': id,
-                'jsdformat': self.dformat,
-                'ico_calendar': ico_calendar,
-                'ico_cross': ico_cross,
-                'ico_calendar_desc': _('Select date'),
-                'ico_cross_desc': _('Clear date'),
-                'default_human_value': self.default_human_value,
-            }
+            </script>""" % {
+            'input_attr': forms.util.flatatt(final_attrs),
+            'id': id,
+            'jsdformat': self.dformat,
+            'ico_calendar': ico_calendar,
+            'ico_cross': ico_cross,
+            'ico_calendar_desc': _('Select date'),
+            'ico_cross_desc': _('Clear date'),
+            'default_human_value': self.default_human_value,
+        }
         return mark_safe(html)
 
     def value_from_datadict(self, data, files, name):
