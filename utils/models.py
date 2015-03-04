@@ -91,6 +91,10 @@ def ModelQuerySetManager(ManagerBase=models.Manager):
         def get_queryset(self):
             return self.model.QuerySet(self.model)
 
+        def get_query_set(self):
+            # for compatibility with old Django versions
+            return self.get_queryset()
+
         # this method cause memory overfull in admin and make one more expensive query
         def __getattr__(self, name):
             if name[0] != '_':
