@@ -127,3 +127,24 @@ class AnonymousRequired( object ):
         if request.user is not None or request.user.is_authenticated():
             return HttpResponseRedirect( self.redirect_to )
         return self.view_function( request, *args, **kwargs )
+
+
+
+'''
+From here http://stackoverflow.com/questions/815110/is-there-a-decorator-to-simply-cache-function-return-values
+With modifications for properties
+'''
+
+
+def memoize(function):
+    memo = {}
+
+    def wrapper(*args, **kwargs):
+        key = (args, frozenset(sorted(kwargs.items())))
+        if key in memo:
+            return memo[key]
+        else:
+            result = function(*args, **kwargs) if hasattr(function, '__call__') else function
+            memo[key] = result
+            return result
+    return wrapper
