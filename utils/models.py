@@ -48,6 +48,15 @@ class ConvertGenericMixin(object):
     def convert_generic(self, args, kwargs):
         for field in self.model._meta.virtual_fields:
             if isinstance(field, generic.GenericForeignKey):
+                for key, value in kwargs.items():
+                    parts = key.split('__')
+                    if len(parts) == 2:
+                        if field.name == parts[0] and parts[1] == 'in':
+                            content_objects = kwargs.pop(key)
+                            kwargs[field.ct_field] = ContentType.objects.get_for_model(content_objects[0])
+                            kwargs['%s__in' % field.fk_field] = content_objects.values_list('pk') \
+                                if isinstance(content_objects, QuerySet) else [o.pk for o in content_objects]
+
                 if field.name in kwargs:
                     content_object = kwargs.pop(field.name)
                     kwargs[field.ct_field] = ContentType.objects.get_for_model(content_object)
