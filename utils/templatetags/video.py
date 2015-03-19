@@ -33,10 +33,14 @@ def ivi_tag(video_id, width, height):
 
 def kinopoisk_tag(video_file, preview_file, video_url, width, height):
 
-    preview_id = re.findall(r'_(\d+).jpg$', preview_file)[0]
+    try:
+        preview_id = re.findall(r'_(\d+).jpg$', preview_file)[0]
+        video_id = re.findall(r'^(\d+)', video_file)[0]
+        video_file = re.findall(r'/(.+)', video_file)[0]
+    except IndexError:
+        return ''
+
     preview_file = 'http://tr.kinopoisk.ru/' + preview_file
-    video_id = re.findall(r'^(\d+)', video_file)[0]
-    video_file = re.findall(r'/(.+)', video_file)[0]
     video_file = 'http://www.kinopoisk.ru/gettrailer.php' + urllib2.quote('?trid=%s&film=%s&tid=%s' % (preview_id, video_id, video_file))
 
     return '''
