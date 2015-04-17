@@ -14,8 +14,8 @@ class CustomUserInterface(object):
     @property
     def user_class(self):
         if not hasattr(self, '_user_class'):
-            if hasattr(settings, 'CUSTOM_USER_MODEL'):
-                self._user_class = get_model(*settings.CUSTOM_USER_MODEL.split('.', 2))
+            if hasattr(settings, 'AUTH_USER_MODEL'):
+                self._user_class = get_model(*settings.AUTH_USER_MODEL.split('.', 2))
                 if not self._user_class:
                     raise ImproperlyConfigured('Could not get custom user model')
             else:

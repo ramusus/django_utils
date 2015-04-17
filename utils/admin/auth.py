@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.contrib.admin.sites import NotRegistered
 from django.utils.safestring import mark_safe
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
@@ -42,7 +43,7 @@ persons.allow_tags = True
 persons.short_description = u'пользователи'
 
 class UserAdmin(UserAdmin):
-    list_display = ['id', 'username', 'email', 'first_name', 'last_name', 'is_active', staff, adm, roles, last]
+    list_display = ['pk', 'username', 'email', 'first_name', 'last_name', 'is_active', staff, adm, roles, last]
     list_display_links = ['username']
     list_filter = ['groups', 'is_staff', 'is_superuser', 'is_active']
 
@@ -50,7 +51,10 @@ class GroupAdmin(GroupAdmin):
     list_display = ['name', persons]
     list_display_links = ['name']
 
-admin.site.unregister(User)
+try:
+    admin.site.unregister(User)
+    admin.site.register(User, UserAdmin)
+except NotRegistered:
+    pass
 admin.site.unregister(Group)
-admin.site.register(User, UserAdmin)
 admin.site.register(Group, GroupAdmin)
