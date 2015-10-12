@@ -164,7 +164,8 @@ foo < bar
     entity_re = re.compile(r'&(#?)(x?)(\w+);')
     return entity_re.subn(substitute_entity, string)[0]
 
-from pytils.templatetags.pytils_dt import ru_strftime, distance_of_time
+from pytils.templatetags.pytils_dt import ru_strftime
+from pytils import dt
 from django.utils.datetime_safe import strftime
 from django.utils.translation import ugettext as _
 from django.utils import timezone
@@ -181,7 +182,7 @@ def smart_time(date):
     today = now.replace(hour=0, minute=0, second=0)
     if date > now - datetime.timedelta(hours=2) and is_language('ru'):
         # from 2 hours ago to now
-        return distance_of_time(date)
+        return dt.distance_of_time_in_words(date, 1, now)
     elif date > today:
         # from start of today to 2 hours ago
         format = u'%H:%M'
