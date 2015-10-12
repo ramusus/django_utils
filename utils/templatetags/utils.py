@@ -167,6 +167,7 @@ foo < bar
 from pytils.templatetags.pytils_dt import ru_strftime, distance_of_time
 from django.utils.datetime_safe import strftime
 from django.utils.translation import ugettext as _
+from django.utils import timezone
 import datetime
 from .. import is_language
 
@@ -176,7 +177,7 @@ def smart_time(date):
     """
     Cover for ru_strftime from pytils. Don't show needless part of time string
     """
-    now = datetime.datetime.now(date.tzinfo)
+    now = timezone.now()
     today = now.replace(hour=0, minute=0, second=0)
     if date > now - datetime.timedelta(hours=2) and is_language('ru'):
         # from 2 hours ago to now
