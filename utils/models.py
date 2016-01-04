@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
-from django.contrib.contenttypes import generic
-from django.contrib.contenttypes.generic import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import Manager
 from django.db.models.query import QuerySet
 
+try:
+    # Django 1.9
+    from django.contrib.contenttypes.fields import GenericForeignKey
+except ImportError:
+    from django.contrib.contenttypes.generic import GenericForeignKey
 
 class GenericFieldsModelMixin(object):
 
@@ -47,7 +50,7 @@ class ConvertGenericMixin(object):
 
     def convert_generic(self, args, kwargs):
         for field in self.model._meta.virtual_fields:
-            if isinstance(field, generic.GenericForeignKey):
+            if isinstance(field, GenericForeignKey):
                 for key, value in kwargs.items():
                     parts = key.split('__')
                     if len(parts) == 2:
