@@ -52,9 +52,8 @@ through {% extends ... %} tags.
 """
 
 from django import template
-from django.template import resolve_variable, FilterExpression
+from django.template.base import FilterExpression
 from django.template.loader import get_template
-from django.conf import settings
 import re
 
 register = template.Library()
