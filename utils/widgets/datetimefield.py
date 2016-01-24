@@ -3,6 +3,7 @@ import datetime
 import time
 
 from django import forms
+from django.forms.utils import flatatt
 from django.conf import settings
 from django.utils import formats
 from django.utils.safestring import mark_safe
@@ -111,7 +112,7 @@ class DateTimeWidget(forms.widgets.TextInput):
                     return false;
                 });
             </script>""" % {
-            'input_attr': forms.util.flatatt(final_attrs),
+            'input_attr': flatatt(final_attrs),
             'id': id,
             'jsdformat': self.dformat,
             'ico_calendar': ico_calendar,
